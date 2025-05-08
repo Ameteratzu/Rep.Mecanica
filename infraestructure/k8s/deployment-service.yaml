@@ -1,0 +1,37 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rep-mecanica-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: rep-mecanica
+  template:
+    metadata:
+      labels:
+        app: rep-mecanica
+    spec:
+      containers:
+        - name: backend
+          image: ghcr.io/Ameteratzu/rep-mecanica:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: NODE_ENV
+              value: production
+      imagePullSecrets:
+        - name: regcred
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rep-mecanica-svc
+spec:
+  type: ClusterIP
+  selector:
+    app: rep-mecanica
+  ports:
+    - port: 80
+      targetPort: 3000

@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rep-mecanica
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Ameteratzu/Rep.Mecanica.git
+    targetRevision: main
+    path: infrastructure/k8s
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: backend
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

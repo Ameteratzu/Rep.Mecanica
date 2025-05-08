@@ -1,0 +1,38 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: build-and-push
+spec:
+  params:
+    - name: IMAGE
+      type: string
+  workspaces:
+    - name: source
+  tasks:
+    - name: kaniko-build
+      taskSpec:
+        workspaces:
+          - name: source
+        steps:
+          - name: build-and-push
+            image: gcr.io/kaniko-project/executor:latest
+            command: ["/kaniko/executor"]
+            args:
+              - "--dockerfile=/workspace/source/backend/Dockerfile"
+              - "--context=/workspace/source/backend"
+              - "--destination=$(params.IMAGE)"
+---
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: build-and-push-run
+spec:
+  pipelineRef:
+    name: build-and-push
+  params:
+    - name: IMAGE
+      value: ghcr.io/Ameteratzu/rep-mecanica:$(uid)
+  workspaces:
+    - name: source
+      persistentVolumeClaim:
+        claimName: repo-pvc
