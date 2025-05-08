@@ -1,6 +1,10 @@
-from fastapi import FastAPI
-from app.routes import users
+from flask import Flask, render_template
 
-app = FastAPI()
+app = Flask(__name__)
 
-app.include_router(users.router)
+@app.route("/")
+def index():
+    return render_template("/index.html")
+
+if __name__ == "__main__":
+    app.run(debug=True)
