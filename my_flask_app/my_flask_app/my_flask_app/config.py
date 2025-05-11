@@ -1,10 +1,10 @@
 # Configuraci�n de la app.
 # config.py
 
-# Configuración de conexión a SQL Server
-SQL_SERVER = {
-    "server": "DESKTOP-NOMBRE\\SQLEXPRESS",  # Reemplaza por tu servidor
-    "database": "mi_basedatos",  # Nombre de tu base de datos
-    "username": "mi_usuario_sql",  # Usuario de SQL Server
-    "driver": "ODBC Driver 17 for SQL Server"
-}
+# config.py
+
+# URI de conexión a MySQL usando SQLAlchemy y PyMySQL
+SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://usuario:contraseña@localhost/nombre_base_datos'
+
+# Opcional: desactiva el seguimiento de modificaciones para mejorar el rendimiento
+SQLALCHEMY_TRACK_MODIFICATIONS = False
