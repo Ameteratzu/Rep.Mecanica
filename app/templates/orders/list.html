@@ -1,7 +1,13 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <h2>Listado de Órdenes</h2>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Listado de Órdenes</h2>
+    <!-- Botón que dispara el modal -->
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#orderModal">
+      Agregar Orden
+    </button>
+  </div>
 
   <table class="table table-hover">
     <thead>
@@ -10,60 +16,196 @@
         <th>Cliente</th>
         <th>Fecha</th>
         <th>Estado</th>
+        <th>Acciones</th>
       </tr>
     </thead>
     <tbody>
-      {# iteramos sobre 'orders', no 'ordenes' #}
-      {% for order in orders %}
+      {% for orden in orders %}
       <tr>
-        <td>{{ order.id }}</td>
-        {# como tu relación es 'cliente' y modelo usa User o Cliente con atributos 'nombres' y 'apellidos' #}
-        <td>{{ order.cliente.nombres }} {{ order.cliente.apellidos }}</td>
-        <td>{{ order.fecha.strftime('%Y-%m-%d') }}</td>
-        <td>{{ order.estado }}</td>
+        <td>{{ orden.id }}</td>
+        <td>{{ orden.cliente.nombres }} {{ orden.cliente.apellidos }}</td>
+        <td>{{ orden.fecha.strftime('%Y-%m-%d') }}</td>
+        <td>{{ orden.estado_orden.estado_orden }}</td>
+        <td>
+          <a href="{{ url_for('orders.edit_order', order_id=orden.id) }}" class="btn btn-sm btn-warning">Editar</a>
+          <form action="{{ url_for('orders.delete_order', order_id=orden.id) }}" method="post" style="display:inline">
+            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar esta orden?');">
+              Eliminar
+            </button>
+          </form>
+        </td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
 
+  <!-- Paginación -->
   <nav>
     <ul class="pagination">
       {% if pagination.has_prev %}
-        <li class="page-item">
-          <a class="page-link"
-             href="{{ url_for('orders.list_orders', page=pagination.prev_num) }}">
-            ← Anterior
-          </a>
-        </li>
+      <li class="page-item">
+        <a class="page-link" href="{{ url_for('orders.list_orders', page=pagination.prev_num) }}">← Anterior</a>
+      </li>
       {% else %}
-        <li class="page-item disabled"><span class="page-link">← Anterior</span></li>
+      <li class="page-item disabled"><span class="page-link">← Anterior</span></li>
       {% endif %}
-
       {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
         {% if p %}
           {% if p == pagination.page %}
-            <li class="page-item active"><span class="page-link">{{ p }}</span></li>
+          <li class="page-item active"><span class="page-link">{{ p }}</span></li>
           {% else %}
-            <li class="page-item">
-              <a class="page-link"
-                 href="{{ url_for('orders.list_orders', page=p) }}">{{ p }}</a>
-            </li>
+          <li class="page-item"><a class="page-link" href="{{ url_for('orders.list_orders', page=p) }}">{{ p }}</a></li>
           {% endif %}
         {% else %}
-          <li class="page-item disabled"><span class="page-link">…</span></li>
+        <li class="page-item disabled"><span class="page-link">…</span></li>
         {% endif %}
       {% endfor %}
-
       {% if pagination.has_next %}
-        <li class="page-item">
-          <a class="page-link"
-             href="{{ url_for('orders.list_orders', page=pagination.next_num) }}">
-            Siguiente →
-          </a>
-        </li>
+      <li class="page-item">
+        <a class="page-link" href="{{ url_for('orders.list_orders', page=pagination.next_num) }}">Siguiente →</a>
+      </li>
       {% else %}
-        <li class="page-item disabled"><span class="page-link">Siguiente →</span></li>
+      <li class="page-item disabled"><span class="page-link">Siguiente →</span></li>
       {% endif %}
     </ul>
   </nav>
+
+  <!-- ===================== -->
+  <!-- Modal: Agregar Orden -->
+  <!-- ===================== -->
+  <div class="modal fade" id="orderModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Agregar Orden de servicio</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-header justify-content-center position-relative">
+          <h5 class="modal-title text-center w-100">Agregar Orden de servicio</h5>
+          <!-- colocamos el botón de cerrar como absolute top-right -->
+          <button type="button"
+                  class="btn-close position-absolute top-0 end-0 m-3"
+                  data-bs-dismiss="modal"
+                  aria-label="Cerrar">
+          </button>
+        </div>
+        <form method="post" action="{{ url_for('orders.create_order') }}">
+          <div class="modal-body">
+            <div class="row mb-3">
+              <div class="col-md-4">
+                <label class="form-label">Estado de Orden</label>
+                <select name="estado_orden" class="form-select" required>
+                  <option value="" selected>Seleccione</option>
+                  {% for e in estados %}
+                  <option value="{{ e.id }}">{{ e.estado_orden }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-4 offset-md-4">
+                <label class="form-label">N° Orden</label>
+                <input type="text" name="nro_orden" class="form-control" required>
+              </div>
+            </div>
+
+            <h6>Cliente:</h6>
+            <div class="row mb-3">
+              <div class="col-md-3">
+                <label class="form-label">Documento</label>
+                <div class="input-group">
+                  <input type="text" name="cliente_id" class="form-control" placeholder="ID cliente" required>
+                  <button class="btn btn-outline-secondary" type="button">
+                    <i class="bi bi-search"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="col-md-5">
+                <label class="form-label">Nombre</label>
+                <input type="text" class="form-control" disabled placeholder="Se autocompleta">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Celular</label>
+                <input type="text" class="form-control" disabled placeholder="Se autocompleta">
+              </div>
+            </div>
+
+            <h6>Automóvil:</h6>
+            <div class="row mb-3">
+              <div class="col-md-3">
+                <label class="form-label">Placa</label>
+                <div class="input-group">
+                  <input type="text" name="automovil_id" class="form-control" placeholder="ID auto" required>
+                  <button class="btn btn-outline-secondary" type="button">
+                    <i class="bi bi-search"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Modelo</label>
+                <input type="text" class="form-control" disabled placeholder="Se autocompleta">
+              </div>
+              <div class="col-md-5">
+                <label class="form-label">Marca</label>
+                <input type="text" class="form-control" disabled placeholder="Se autocompleta">
+              </div>
+            </div>
+
+            <hr>
+
+            <button type="button" class="btn btn-dark mb-2">Agregar servicio</button>
+            <table class="table table-bordered mb-4">
+              <thead class="table-light">
+                <tr>
+                  <th>Código</th>
+                  <th>Descripción</th>
+                  <th>Precio</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Aquí se irán listando servicios agregados -->
+              </tbody>
+            </table>
+
+            <button type="button" class="btn btn-dark mb-2">Agregar repuestos</button>
+            <table class="table table-bordered">
+              <thead class="table-light">
+                <tr>
+                  <th>Código</th>
+                  <th>Producto</th>
+                  <th>Cantidad</th>
+                  <th>Precio</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Aquí se irán listando repuestos agregados -->
+              </tbody>
+            </table>
+
+            <div class="d-flex justify-content-end gap-5 mt-4">
+              <div>
+                <div>Total Productos</div>
+                <div>S/ <span>0.00</span></div>
+              </div>
+              <div>
+                <div>Total Servicios</div>
+                <div>S/ <span>0.00</span></div>
+              </div>
+              <div class="fw-bold fs-5">
+                Total de la Orden S/ <span>0.00</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            <button type="submit" class="btn btn-success">Agregar Orden</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <!-- /Modal -->
 {% endblock %}
+
+<!-- Asegúrate de incluir Bootstrap Icons y Bundle en tu base.html o aquí -->
