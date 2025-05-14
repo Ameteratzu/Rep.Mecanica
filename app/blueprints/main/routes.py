@@ -1,26 +1,17 @@
-# Rep.Mecanica/app/blueprints/main/routes.py
+# app/blueprints/main/routes.py
 
 from flask import (
     Blueprint, render_template, redirect,
     url_for, request, flash, current_app
 )
-from flask_login import (
-    login_user, login_required,
-    logout_user, current_user
-)
+from flask_login   import login_user, login_required, logout_user, current_user
 from flask_mail    import Message
 from itsdangerous  import SignatureExpired, BadSignature
 
-from app.extensions   import db, mail, ts
-from app.models.usuario import User
+from app.extensions      import db, mail, ts
+from app.models.usuario  import User
 
-# No especificamos template_folder: usará el folder global app/templates/
 main = Blueprint("main", __name__)
-
-
-@main.route("/ping")
-def ping():
-    return "pong", 200
 
 
 @main.route("/login", methods=["GET", "POST"])
@@ -29,14 +20,12 @@ def login():
         return redirect(url_for("main.index"))
 
     if request.method == "POST":
-        email    = request.form.get("email", "").strip().lower()
-        password = request.form.get("password", "")
-        user     = User.query.filter_by(email=email, active=True).first()
-
+        email    = request.form["email"].strip().lower()
+        password = request.form["password"]
+        user = User.query.filter_by(email=email, active=True).first()
         if user and user.check_password(password):
             login_user(user)
             return redirect(url_for("main.index"))
-
         flash("Usuario o contraseña incorrectos", "danger")
 
     return render_template("login.html")
@@ -48,18 +37,15 @@ def register():
         return redirect(url_for("main.index"))
 
     if request.method == "POST":
-        email     = request.form.get("email", "").strip().lower()
-        password  = request.form.get("password", "")
-        password2 = request.form.get("password2", "")
-
+        email     = request.form["email"].strip().lower()
+        password  = request.form["password"]
+        password2 = request.form["password2"]
         if not email or not password:
             flash("Correo y contraseña son obligatorios", "warning")
             return redirect(url_for("main.register"))
-
         if password != password2:
             flash("Las contraseñas no coinciden", "warning")
             return redirect(url_for("main.register"))
-
         if User.query.filter_by(email=email).first():
             flash("Ya existe una cuenta con ese correo", "warning")
             return redirect(url_for("main.register"))
@@ -81,32 +67,22 @@ def forgot():
         return redirect(url_for("main.index"))
 
     if request.method == "POST":
-        email = request.form.get("email", "").strip().lower()
-        token = ts.dumps(
-            email,
-            salt=current_app.config["SECURITY_PASSWORD_SALT"]
-        )
-        reset_url = url_for(
-            "main.reset_with_token",
-            token=token,
-            _external=True
-        )
+        email = request.form["email"].strip().lower()
+        token = ts.dumps(email, salt=current_app.config["SECURITY_PASSWORD_SALT"])
+        reset_url = url_for("main.reset_with_token", token=token, _external=True)
 
         msg = Message(
-            subject="Restablece tu contraseña – TECMECH",
+            subject=current_app.config["MAIL_SUBJECT_PREFIX"]+" Restablece tu contraseña",
+            sender=current_app.config["MAIL_DEFAULT_SENDER"],
             recipients=[email]
         )
         msg.body = (
-            f"Hola,\n\n"
-            f"Pulsa este enlace para restablecer tu contraseña:\n{reset_url}\n\n"
+            f"Hola,\n\nPulsa este enlace para restablecer tu contraseña:\n{reset_url}\n\n"
             "Si no lo solicitaste, ignora este correo."
         )
         mail.send(msg)
 
-        flash(
-            "Si ese correo existe, recibirás un enlace para restablecer contraseña.",
-            "info"
-        )
+        flash("Si ese correo existe, recibirás un enlace para restablecer contraseña.", "info")
         return redirect(url_for("main.login"))
 
     return render_template("forgot.html")
@@ -118,16 +94,9 @@ def reset_with_token(token):
         return redirect(url_for("main.index"))
 
     try:
-        email = ts.loads(
-            token,
-            salt=current_app.config["SECURITY_PASSWORD_SALT"],
-            max_age=3600
-        )
-    except SignatureExpired:
-        flash("El enlace ha expirado.", "danger")
-        return redirect(url_for("main.forgot"))
-    except BadSignature:
-        flash("El enlace no es válido.", "danger")
+        email = ts.loads(token, salt=current_app.config["SECURITY_PASSWORD_SALT"], max_age=3600)
+    except (SignatureExpired, BadSignature):
+        flash("El enlace no es válido o ha expirado.", "danger")
         return redirect(url_for("main.forgot"))
 
     user = User.query.filter_by(email=email).first()
@@ -136,16 +105,14 @@ def reset_with_token(token):
         return redirect(url_for("main.register"))
 
     if request.method == "POST":
-        pw1 = request.form.get("password", "")
-        pw2 = request.form.get("password2", "")
-
+        pw1 = request.form["password"]
+        pw2 = request.form["password2"]
         if not pw1 or pw1 != pw2:
             flash("Las contraseñas no coinciden.", "warning")
             return render_template("reset.html", token=token)
 
         user.set_password(pw1)
         db.session.commit()
-
         flash("Contraseña actualizada. Ahora puedes iniciar sesión.", "success")
         return redirect(url_for("main.login"))
 
