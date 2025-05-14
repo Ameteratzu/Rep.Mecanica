@@ -1,0 +1,8 @@
+Flask
+Flask-Login
+Flask-Mail
+itsdangerous
+PyMySQL
+Flask-SQLAlchemy
+Flask-Mail
+itsdangerous
