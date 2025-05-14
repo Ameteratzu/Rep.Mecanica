@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}Agregar Orden de servicio{% endblock %}
+{% block content %}
+<h2 class="mb-4">Agregar Orden de servicio</h2>
+
+<form method="post">
+  <div class="row mb-3">
+    <div class="col-md-4">
+      <label>Estado de Orden</label>
+      <select name="estado_orden" class="form-select">
+        {% for est in estados %}
+          <option value="{{ est.id }}">{{ est.estado_orden }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4">
+      <label>N° Orden</label>
+      <input type="text" name="nro_orden" class="form-control">
+    </div>
+  </div>
+
+  <h5>Cliente:</h5>
+  <div class="row mb-4 align-items-end">
+    <div class="col-md-3">
+      <label>Documento</label>
+      <div class="input-group">
+        <input type="text" id="doc-busqueda" class="form-control">
+        <button type="button" class="btn btn-outline-secondary">
+          <i class="bi bi-search"></i>
+        </button>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <label>Nombre</label>
+      <input type="text" name="cliente_nombre" class="form-control" readonly>
+    </div>
+    <div class="col-md-3">
+      <label>Celular</label>
+      <input type="text" name="cliente_celular" class="form-control" readonly>
+    </div>
+    <input type="hidden" name="cliente_id">
+  </div>
+
+  <h5>Automóvil:</h5>
+  <div class="row mb-4 align-items-end">
+    <div class="col-md-3">
+      <label>Placa</label>
+      <div class="input-group">
+        <input type="text" id="placa-busqueda" class="form-control">
+        <button type="button" class="btn btn-outline-secondary">
+          <i class="bi bi-search"></i>
+        </button>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <label>Modelo</label>
+      <input type="text" name="auto_modelo" class="form-control" readonly>
+    </div>
+    <div class="col-md-3">
+      <label>Marca</label>
+      <input type="text" name="auto_marca" class="form-control" readonly>
+    </div>
+    <input type="hidden" name="automovil_id">
+  </div>
+
+  <!-- Servicios -->
+  <button type="button" class="btn btn-dark mb-2" id="agregar-servicio">
+    Agregar servicio
+  </button>
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th>Código</th><th>Descripción</th><th>Precio</th><th>Acción</th>
+      </tr>
+    </thead>
+    <tbody id="servicios-body">
+      <!-- será rellenado por JS o con un bucle si estás editando -->
+    </tbody>
+  </table>
+
+  <!-- Productos -->
+  <button type="button" class="btn btn-dark mb-2" id="agregar-producto">
+    Agregar Repuestos
+  </button>
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th>Código</th><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Acción</th>
+      </tr>
+    </thead>
+    <tbody id="productos-body">
+      <!-- aquí van las filas dinámicas -->
+    </tbody>
+  </table>
+
+  <!-- Totales -->
+  <div class="d-flex justify-content-end gap-5 fs-5">
+    <div>Total Productos: S/ <span id="total-productos">0.00</span></div>
+    <div>Total Servicios: S/ <span id="total-servicios">0.00</span></div>
+    <div><strong>Total de la Orden: S/ <span id="total-orden">0.00</span></strong></div>
+  </div>
+
+  <!-- Botones -->
+  <div class="mt-4 d-flex justify-content-between">
+    <button type="submit" class="btn btn-secondary">
+      Agregar o modificar Orden
+    </button>
+    <a href="{{ url_for('orders.list_orders') }}" class="btn btn-primary">
+      Agregar Orden
+    </a>
+  </div>
+</form>
+
+<script>
+// Aquí puedes agregar tu JS para:
+//  - Buscar cliente/auto por documento/placa (fetch AJAX)
+//  - Añadir filas dinámicamente a #servicios-body y #productos-body
+//  - Calcular totales en tiempo real y actualizar #total-productos, etc.
+</script>
+{% endblock %}

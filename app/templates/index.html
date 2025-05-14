@@ -112,7 +112,7 @@
     box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     z-index: 1000;
     text-decoration: none
-  }
+    }
   </style>
 </head>
 <body class="bg-dark text-white">
@@ -134,7 +134,7 @@
       <h5 class="m-4">Administrador</h5>
       <ul class="nav flex-column">
         <li class="nav-item">
-          <a href="{{ url_for('main.index') }}" class="nav-link active">Reparaciones</a>
+          <a href="{{ url_for('main.dashboard') }}" class="nav-link active">Reparaciones</a>
         </li>
         <li class="nav-item">
           <a href="{{ url_for('orders.list_orders') }}" class="nav-link">Órdenes</a>
@@ -194,29 +194,96 @@
           </tr>
         </thead>
         <tbody>
+          {% for c in clients %}
           <tr>
-            <td>12345678</td>
-            <td>Juan</td>
-            <td>Pérez</td>
-            <td>juan.perez@email.com</td>
-            <td>987654321</td>
-            <td>Activo</td>
+            <td>{{ c.documento }}</td>
+            <td>{{ c.nombres }}</td>
+            <td>{{ c.apellidos }}</td>
+            <td>{{ c.correo }}</td>
+            <td>{{ c.celular }}</td>
+            <td>{{ 'Activo' if c.activo else 'Inactivo' }}</td>
             <td>
               <button class="btn btn-sm btn-warning">Editar</button>
               <button class="btn btn-sm btn-danger">Eliminar</button>
             </td>
           </tr>
+          {% endfor %}
         </tbody>
       </table>
 
       <!-- Paginación -->
       <nav>
         <ul class="pagination">
-          <li class="page-item"><a class="page-link" href="#">1</a></li>
-          <li class="page-item"><a class="page-link" href="#">2</a></li>
-          <li class="page-item"><a class="page-link" href="#">3</a></li>
+          {% if pagination.has_prev %}
+          <li class="page-item">
+            <a class="page-link"
+               href="{{ url_for('main.dashboard', page=pagination.prev_num) }}">←</a>
+          </li>
+          {% endif %}
+          {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+            {% if p %}
+              {% if p == pagination.page %}
+              <li class="page-item active"><span class="page-link">{{ p }}</span></li>
+              {% else %}
+              <li class="page-item">
+                <a class="page-link"
+                   href="{{ url_for('main.dashboard', page=p) }}">{{ p }}</a>
+              </li>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+          {% if pagination.has_next %}
+          <li class="page-item">
+            <a class="page-link"
+               href="{{ url_for('main.dashboard', page=pagination.next_num) }}">→</a>
+          </li>
+          {% endif %}
         </ul>
       </nav>
+    </div>
+  </div>
+
+   <!-- Modal: Agregar Cliente -->
+  <div class="modal fade" id="clientModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content text-dark">
+        <div class="modal-header">
+          <h5 class="modal-title">Agregar Cliente</h5>
+          <button type="button" class="btn-close"
+                  data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <form method="post" action="{{ url_for('main.create_client') }}">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Documento</label>
+              <input name="documento" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Nombres</label>
+              <input name="nombres" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Apellidos</label>
+              <input name="apellidos" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Correo</label>
+              <input name="correo" type="email" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Celular</label>
+              <input name="celular" class="form-control">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary"
+                    data-bs-dismiss="modal">Cerrar</button>
+            <button type="submit" class="btn btn-primary">
+              Guardar
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 

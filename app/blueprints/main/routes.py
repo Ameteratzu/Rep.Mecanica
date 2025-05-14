@@ -10,6 +10,7 @@ from itsdangerous  import SignatureExpired, BadSignature
 
 from app.extensions      import db, mail, ts
 from app.models.usuario  import User
+from app.models.cliente import Cliente 
 
 main = Blueprint("main", __name__)
 
@@ -17,7 +18,7 @@ main = Blueprint("main", __name__)
 @main.route("/login", methods=["GET", "POST"])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for("main.index"))
+        return redirect(url_for("main.dashboard"))
 
     if request.method == "POST":
         email    = request.form["email"].strip().lower()
@@ -25,7 +26,7 @@ def login():
         user = User.query.filter_by(email=email, active=True).first()
         if user and user.check_password(password):
             login_user(user)
-            return redirect(url_for("main.index"))
+            return redirect(url_for("main.dashboard"))
         flash("Usuario o contraseña incorrectos", "danger")
 
     return render_template("login.html")
@@ -34,7 +35,7 @@ def login():
 @main.route("/register", methods=["GET", "POST"])
 def register():
     if current_user.is_authenticated:
-        return redirect(url_for("main.index"))
+        return redirect(url_for("main.dashboard"))
 
     if request.method == "POST":
         email     = request.form["email"].strip().lower()
@@ -64,7 +65,7 @@ def register():
 @main.route("/forgot", methods=["GET", "POST"])
 def forgot():
     if current_user.is_authenticated:
-        return redirect(url_for("main.index"))
+        return redirect(url_for("main.dashboard"))
 
     if request.method == "POST":
         email = request.form["email"].strip().lower()
@@ -91,7 +92,7 @@ def forgot():
 @main.route("/reset/<token>", methods=["GET", "POST"])
 def reset_with_token(token):
     if current_user.is_authenticated:
-        return redirect(url_for("main.index"))
+        return redirect(url_for("main.dashboard"))
 
     try:
         email = ts.loads(token, salt=current_app.config["SECURITY_PASSWORD_SALT"], max_age=3600)
@@ -126,7 +127,52 @@ def logout():
     return redirect(url_for("main.login"))
 
 
-@main.route("/")
+@main.route("/", methods=["GET"])
 @login_required
-def index():
-    return render_template("index.html")
+def dashboard():
+    # Paginar clientes
+    page     = request.args.get("page", 1, type=int)
+    per_page = 10
+    pagination = Cliente.query \
+        .order_by(Cliente.id.desc()) \
+        .paginate(page=page, per_page=per_page, error_out=False)
+    clients = pagination.items
+
+    return render_template(
+        "index.html",
+        clients    = clients,
+        pagination = pagination
+    )
+
+@main.route("/clientes/nuevo", methods=["POST"])
+@login_required
+def create_client():
+    """
+    Procesa el POST desde el modal de 'Agregar' en el dashboard.
+    """
+    documento = request.form.get("documento", "").strip()
+    nombres   = request.form.get("nombres",   "").strip()
+    apellidos = request.form.get("apellidos", "").strip()
+    correo    = request.form.get("correo",    "").strip().lower()
+    celular   = request.form.get("celular",   "").strip()
+
+    # Validación mínima
+    if not documento or not nombres or not apellidos or not correo:
+        flash("Todos los campos son obligatorios.", "warning")
+        return redirect(url_for("main.dashboard", page=request.args.get("page", 1)))
+
+    # Crea y guarda el Cliente
+    cliente = Cliente(
+        documento=documento,
+        nombres=nombres,
+        apellidos=apellidos,
+        correo=correo,
+        ubigeo_id=1,     # Ajusta según tu lógica
+        direccion="",
+        celular=celular
+    )
+    db.session.add(cliente)
+    db.session.commit()
+
+    flash("Cliente agregado correctamente.", "success")
+    return redirect(url_for("main.dashboard", page=request.args.get("page", 1)))

@@ -9,8 +9,13 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(200), nullable=False)
     active        = db.Column(db.Boolean, default=True)
 
+    ordenes = db.relationship("Orden", back_populates="usuario")
+
     def set_password(self, pw):
         self.password_hash = generate_password_hash(pw)
 
     def check_password(self, pw):
         return check_password_hash(self.password_hash, pw)
+
+# Este alias asegura que SQLAlchemy encuentre "Usuario"
+Usuario = User

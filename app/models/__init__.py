@@ -1,19 +1,23 @@
 # app/models/__init__.py
 
-# Importa todos los modelos para que SQLAlchemy los registre al iniciar la app
 from .usuario       import User
 from .cliente       import Cliente
 from .estado_orden  import EstadoOrden
+from .automovil     import Automovil
+from .categoria     import Categoria
+from .producto      import Producto
+from .servicio      import Servicio
 from .orden         import Orden
 from .comprobante   import Comprobante
-from .producto      import Producto
 
-# Lista pública de símbolos expuestos
 __all__ = [
     "User",
     "Cliente",
     "EstadoOrden",
+    "Automovil",
+    "Categoria",
+    "Producto",
+    "Servicio",
     "Orden",
     "Comprobante",
-    "Producto",
 ]
