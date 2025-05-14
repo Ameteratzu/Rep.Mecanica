@@ -86,12 +86,3 @@ select {
   border-radius: 3em;
   border-color: #000;
 }
-
-/* Botón fijo de logout */
-.btn-logout {
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
-  z-index: 1000;
-  border-radius: 0;
-}
