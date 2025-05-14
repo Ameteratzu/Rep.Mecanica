@@ -8,7 +8,7 @@ from flask_login   import login_user, login_required, logout_user, current_user
 from flask_mail    import Message
 from itsdangerous  import SignatureExpired, BadSignature
 
-from app.extensions      import db, mail, ts
+from app.extensions      import db, mail
 from app.models.usuario  import User
 from app.models.cliente import Cliente 
 
@@ -95,7 +95,7 @@ def reset_with_token(token):
         return redirect(url_for("main.dashboard"))
 
     try:
-        email = ts.loads(token, salt=current_app.config["SECURITY_PASSWORD_SALT"], max_age=3600)
+        email = current_app.ts.loads(token, salt=current_app.config["SECURITY_PASSWORD_SALT"],max_age=3600)
     except (SignatureExpired, BadSignature):
         flash("El enlace no es válido o ha expirado.", "danger")
         return redirect(url_for("main.forgot"))
