@@ -1,19 +1,37 @@
 {% extends "base.html" %}
+
 {% block content %}
   <h2>Listado de Órdenes</h2>
-  <table class="table">
+
+  <table class="table table-hover">
     <thead>
       <tr>
-        <th>ID</th><th>Cliente</th><th>Fecha</th><th>Estado</th>
+        <th>ID</th>
+        <th>Cliente</th>
+        <th>Fecha</th>
+        <th>Estado</th>
+        <th>Acciones</th>
       </tr>
     </thead>
     <tbody>
-      {% for order in orders %}
+      {% for orden in ordenes %}
       <tr>
-        <td>{{ order.id }}</td>
-        <td>{{ order.cliente.nombre }}</td>
-        <td>{{ order.fecha.strftime('%Y-%m-%d') }}</td>
-        <td>{{ order.estado }}</td>
+        <td>{{ orden.id }}</td>
+        <td>{{ orden.cliente.nombres }} {{ orden.cliente.apellidos }}</td>
+        <td>{{ orden.fecha.strftime('%Y-%m-%d') }}</td>
+        <td>{{ orden.estado }}</td>
+        <td>
+          <a href="{{ url_for('orders.edit_order', order_id=orden.id, page=pagination.page) }}"
+             class="btn btn-sm btn-warning">Editar</a>
+          <form action="{{ url_for('orders.delete_order', order_id=orden.id) }}"
+                method="post" style="display:inline">
+            <button type="submit"
+                    class="btn btn-sm btn-danger"
+                    onclick="return confirm('¿Eliminar esta orden?');">
+              Eliminar
+            </button>
+          </form>
+        </td>
       </tr>
       {% endfor %}
     </tbody>
@@ -23,30 +41,47 @@
     <ul class="pagination">
       {% if pagination.has_prev %}
       <li class="page-item">
-        <a class="page-link" href="{{ url_for('orders.list_orders', page=pagination.prev_num) }}">← Anterior</a>
+        <a class="page-link"
+           href="{{ url_for('orders.list_orders', page=pagination.prev_num) }}">
+          ← Anterior
+        </a>
       </li>
       {% else %}
-      <li class="page-item disabled"><span class="page-link">← Anterior</span></li>
+      <li class="page-item disabled">
+        <span class="page-link">← Anterior</span>
+      </li>
       {% endif %}
 
       {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
         {% if p %}
           {% if p == pagination.page %}
-          <li class="page-item active"><span class="page-link">{{ p }}</span></li>
+          <li class="page-item active">
+            <span class="page-link">{{ p }}</span>
+          </li>
           {% else %}
-          <li class="page-item"><a class="page-link" href="{{ url_for('orders.list_orders', page=p) }}">{{ p }}</a></li>
+          <li class="page-item">
+            <a class="page-link"
+               href="{{ url_for('orders.list_orders', page=p) }}">{{ p }}</a>
+          </li>
           {% endif %}
         {% else %}
-          <li class="page-item disabled"><span class="page-link">…</span></li>
+        <li class="page-item disabled">
+          <span class="page-link">…</span>
+        </li>
         {% endif %}
       {% endfor %}
 
       {% if pagination.has_next %}
       <li class="page-item">
-        <a class="page-link" href="{{ url_for('orders.list_orders', page=pagination.next_num) }}">Siguiente →</a>
+        <a class="page-link"
+           href="{{ url_for('orders.list_orders', page=pagination.next_num) }}">
+          Siguiente →
+        </a>
       </li>
       {% else %}
-      <li class="page-item disabled"><span class="page-link">Siguiente →</span></li>
+      <li class="page-item disabled">
+        <span class="page-link">Siguiente →</span>
+      </li>
       {% endif %}
     </ul>
   </nav>

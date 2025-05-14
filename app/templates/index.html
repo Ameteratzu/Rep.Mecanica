@@ -126,10 +126,10 @@
       <h5 class="m-4">Administrador</h5>
       <ul class="nav flex-column">
         <li class="nav-item">
-          <a href="#" class="nav-link active">Reparaciones</a>
+          <a href="{{ url_for('main.index') }}" class="nav-link active">Reparaciones</a>
         </li>
         <li class="nav-item">
-          <a href="#" class="nav-link">Órdenes</a>
+          <a href="{{ url_for('orders.list_orders') }}" class="nav-link">Órdenes</a>
         </li>
         <li class="nav-item">
           <a href="#" class="nav-link">Comprobantes</a>

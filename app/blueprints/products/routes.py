@@ -1,8 +1,5 @@
-from flask import Blueprint, render_template, request
-from flask_login import login_required, current_user
-from app.extensions import db
-
-# IMPORTA AQUÍ TU MODELO DE PRODUCTOS:
+from flask import Blueprint, render_template_string
+from flask_login import login_required
 from app.models.producto import Producto
 
 products_bp = Blueprint("products", __name__, url_prefix="/productos")
@@ -10,16 +7,20 @@ products_bp = Blueprint("products", __name__, url_prefix="/productos")
 @products_bp.route("/", methods=["GET"])
 @login_required
 def list_products():
-    page = request.args.get("page", 1, type=int)
-    per_page = 20
-
-    pagination = (
-        Producto.query
-                .order_by(Producto.id.asc())
-                .paginate(page=page, per_page=per_page, error_out=False)
-    )
-    return render_template(
-        "products/list.html",
-        products=pagination.items,
-        pagination=pagination
-    )
+    productos = Producto.query.order_by(Producto.id).all()
+    return render_template_string("""
+    {% extends "base.html" %}
+    {% block content %}
+      <h1>Productos</h1>
+      <ul>
+        {% for p in productos %}
+          <li>
+            <strong>#{{ p.id }}</strong> — {{ p.nombre }}  
+            (precio: {{ p.precio }})
+          </li>
+        {% else %}
+          <li>No hay productos registrados.</li>
+        {% endfor %}
+      </ul>
+    {% endblock %}
+    """, productos=productos)

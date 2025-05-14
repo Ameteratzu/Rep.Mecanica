@@ -7,6 +7,7 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # Flask-Mail (Gmail SMTP con App Password)
+    
     MAIL_SERVER         = "smtp.gmail.com"
     MAIL_PORT           = 587
     MAIL_USE_TLS        = True

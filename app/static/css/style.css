@@ -1,0 +1,97 @@
+/* static/css/style.css */
+
+/* Encabezado principal */
+.main-header {
+  background-color: #194989;
+  color: white;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.main-header .logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+.main-header .user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.main-header .user-info img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 0.12em solid white;
+}
+
+/* Barra lateral */
+.sidebar {
+  background-color: #194989;
+  color: white;
+  height: 100vh;
+  padding: 15px;
+}
+.sidebar .nav-link {
+  color: #adb5bd;
+}
+.sidebar a:hover {
+  background-color: white;
+  color: #000 !important;
+}
+.sidebar a {
+  color: white !important;
+  border-bottom: 0.1em solid white;
+}
+.sidebar .nav-link.active {
+  color: white;
+  font-weight: bold;
+}
+
+/* Contenido principal */
+.main-content {
+  background-color: white;
+  margin-left: 0;
+  padding: 2.8em;
+  width: 100%;
+  color: #000;
+}
+
+/* Tabla */
+table {
+  color: black;
+}
+table thead {
+  background-color: #495057;
+  color: white;
+}
+
+/* Búsqueda y botones */
+.buscador-general {
+  border-radius: 2em;
+  border-color: #000;
+}
+.btn {
+  border-radius: 0 !important;
+}
+.btn-primary:hover {
+  background-color: white !important;
+  color: #000;
+}
+.btnauxiliar button {
+  width: 100%;
+  border-radius: 0;
+}
+select {
+  border-radius: 3em;
+  border-color: #000;
+}
+
+/* Botón fijo de logout */
+.btn-logout {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 1000;
+  border-radius: 0;
+}
