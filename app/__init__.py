@@ -30,8 +30,9 @@ def create_app():
     # Inicializa extensiones
     ext.db.init_app(app)
     ext.mail.init_app(app)
-    ext.ts = URLSafeTimedSerializer(app.config["SECRET_KEY"])
-
+    serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
+    app.ts = serializer
+    
     # 3) Ahora sí vinculamos login_manager con la app
     login_manager.init_app(app)
     login_manager.login_view = "main.login"

@@ -69,7 +69,7 @@ def forgot():
 
     if request.method == "POST":
         email = request.form["email"].strip().lower()
-        token = ts.dumps(email, salt=current_app.config["SECURITY_PASSWORD_SALT"])
+        token = current_app.ts.dumps(email, salt=current_app.config["SECURITY_PASSWORD_SALT"])
         reset_url = url_for("main.reset_with_token", token=token, _external=True)
 
         msg = Message(
