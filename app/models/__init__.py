@@ -1,4 +1,4 @@
-# app/models/__init__.py
+from app.extensions import db
 
 from .usuario       import User
 from .cliente       import Cliente
@@ -9,8 +9,10 @@ from .producto      import Producto
 from .servicio      import Servicio
 from .orden         import Orden
 from .comprobante   import Comprobante
+from .persona       import Persona
 
 __all__ = [
+    "db",
     "User",
     "Cliente",
     "EstadoOrden",
@@ -20,4 +22,5 @@ __all__ = [
     "Servicio",
     "Orden",
     "Comprobante",
+    "Persona"
 ]

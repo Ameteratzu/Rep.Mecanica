@@ -1,7 +1,7 @@
-from flask import Blueprint, render_template, request
+from flask import render_template, request
 from flask_login import login_required
 from app.models.producto import Producto
-from flask import redirect, url_for, flash
+from flask import Blueprint, redirect, url_for, flash
 
 products_bp = Blueprint("products", __name__, url_prefix="/productos")
 

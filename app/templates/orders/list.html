@@ -10,12 +10,8 @@
 
   <table class="table table-hover">
     <thead>
-      <tr class="table-dark text-white">
-        <th>ID</th>
-        <th>Cliente</th>
-        <th>Fecha</th>
-        <th>Estado</th>
-        <th>Acciones</th>
+      <tr>
+        <th>ID</th><th>Cliente</th><th>Fecha</th><th>Estado</th><th>Acciones</th>
       </tr>
     </thead>
     <tbody>
@@ -56,14 +52,9 @@
 
       {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
         {% if p %}
-          {% if p == pagination.page %}
-          <li class="page-item active"><span class="page-link">{{ p }}</span></li>
-          {% else %}
-          <li class="page-item">
-            <a class="page-link"
-               href="{{ url_for('orders.list_orders', page=p) }}">{{ p }}</a>
+          <li class="page-item {{ 'active' if p == pagination.page }}">
+            <a class="page-link" href="{{ url_for('orders.list_orders', page=p) }}">{{ p }}</a>
           </li>
-          {% endif %}
         {% else %}
         <li class="page-item disabled"><span class="page-link">…</span></li>
         {% endif %}
@@ -109,26 +100,26 @@
             </div>
 
             <!-- Cliente -->
-            <h6>Cliente:</h6>
-            <div class="row mb-4">
-              <div class="col-md-3">
-                <label class="form-label">Documento</label>
-                <div class="input-group">
-                  <input type="text" name="cliente_id" class="form-control" placeholder="ID cliente" required>
-                  <button class="btn btn-outline-secondary" type="button">
-                    <i class="bi bi-search"></i>
-                  </button>
+              <h6>Cliente:</h6>
+              <div class="row mb-4">
+                <div class="col-md-3">
+                  <label class="form-label">Documento</label>
+                  <div class="input-group">
+                    <input type="text" name="cliente_id" class="form-control" placeholder="ID cliente" required>
+                    <button class="btn btn-outline-secondary" type="button">
+                      <i class="bi bi-search"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Nombre</label>
+                  <input type="text" class="form-control" disabled placeholder="Se autocompleta">
+                </div>
+                <div class="col-md-5">
+                  <label class="form-label">Celular</label>
+                  <input type="text" class="form-control" disabled placeholder="Se autocompleta">
                 </div>
               </div>
-              <div class="col-md-4">
-                <label class="form-label">Nombre</label>
-                <input type="text" class="form-control" disabled placeholder="Se autocompleta">
-              </div>
-              <div class="col-md-5">
-                <label class="form-label">Celular</label>
-                <input type="text" class="form-control" disabled placeholder="Se autocompleta">
-              </div>
-            </div>
 
             <!-- Automóvil -->
             <h6>Automóvil:</h6>

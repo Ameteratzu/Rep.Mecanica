@@ -1,16 +1,14 @@
 # app/blueprints/main/routes.py
 
-from flask import (
-    Blueprint, render_template, redirect,
-    url_for, request, flash, current_app
-)
+from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login   import login_user, login_required, logout_user, current_user
 from flask_mail    import Message
 from itsdangerous  import SignatureExpired, BadSignature
-
+from werkzeug.security import generate_password_hash
 from app.extensions      import db, mail
 from app.models.usuario  import User
 from app.models.cliente import Cliente 
+from app.models import db, Persona, User  
 
 main = Blueprint("main", __name__)
 
@@ -32,34 +30,46 @@ def login():
     return render_template("login.html")
 
 
-@main.route("/register", methods=["GET", "POST"])
+@main.route('/register', methods=['GET', 'POST'])
 def register():
-    if current_user.is_authenticated:
-        return redirect(url_for("main.dashboard"))
+    if request.method == 'POST':
+        nombres = request.form['nombres']
+        apellidos = request.form['apellidos']
+        email = request.form['email']
+        password = request.form['password']
+        password2 = request.form['password2']
 
-    if request.method == "POST":
-        email     = request.form["email"].strip().lower()
-        password  = request.form["password"]
-        password2 = request.form["password2"]
-        if not email or not password:
-            flash("Correo y contraseña son obligatorios", "warning")
-            return redirect(url_for("main.register"))
         if password != password2:
-            flash("Las contraseñas no coinciden", "warning")
-            return redirect(url_for("main.register"))
-        if User.query.filter_by(email=email).first():
-            flash("Ya existe una cuenta con ese correo", "warning")
-            return redirect(url_for("main.register"))
+            flash("Las contraseñas no coinciden.", "danger")
+            return redirect(url_for('main.register'))
 
-        new_user = User(email=email)
-        new_user.set_password(password)
-        db.session.add(new_user)
+        # Crear Persona
+        nueva_persona = Persona(
+            documento="00000000",  # reemplaza o haz que lo ingresen en el form
+            nombres=nombres,
+            apellidos=apellidos,
+            correo=email,
+            rol_id=1,
+            activo=True
+        )
+        db.session.add(nueva_persona)
         db.session.commit()
 
-        flash("Cuenta creada. Ya puedes iniciar sesión.", "success")
+        # Crear Usuario
+        nuevo_usuario = User(
+            email=email,
+            password_hash=generate_password_hash(password),
+            active=True,
+            persona_id=nueva_persona.id
+        )
+        db.session.add(nuevo_usuario)
+        db.session.commit()
+
+        flash("Cuenta creada correctamente", "success")
         return redirect(url_for("main.login"))
 
     return render_template("register.html")
+
 
 
 @main.route("/forgot", methods=["GET", "POST"])
@@ -101,6 +111,7 @@ def reset_with_token(token):
         return redirect(url_for("main.forgot"))
 
     user = User.query.filter_by(email=email).first()
+
     if not user:
         flash("No existe ningún usuario con ese correo.", "warning")
         return redirect(url_for("main.register"))

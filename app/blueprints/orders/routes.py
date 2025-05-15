@@ -5,8 +5,8 @@ from flask import (
 from flask_login import login_required, current_user
 from datetime import date
 from app.extensions import db
-from app.models.estado_orden import EstadoOrden
 from app.models.orden        import Orden
+from app.models.estado_orden import EstadoOrden
 from app.models.cliente      import Cliente
 from app.models.automovil    import Automovil
 from app.models.producto     import Producto
@@ -20,74 +20,71 @@ orders_bp = Blueprint("orders", __name__, url_prefix="/ordenes")
 def list_orders():
     page     = request.args.get("page", 1, type=int)
     per_page = 10
+
+    # consulta paginada de órdenes
     pagination = (
         Orden.query
              .order_by(Orden.id.desc())
              .paginate(page=page, per_page=per_page, error_out=False)
     )
 
-    # Traemos los posibles estados desde su tabla
+    # estados para el modal
     estados = EstadoOrden.query.filter_by(activo=True).all()
 
     return render_template(
         "orders/list.html",
-        ordenes = pagination.items,
+        orders     = pagination.items,
         pagination = pagination,
-        estados = estados,
-        productos = Producto.query.filter_by(activo=True).all(),
-        servicios = Servicio.query.filter_by(activo=True).all(),
+        estados    = estados
     )
 
 
-@orders_bp.route("/nueva", methods=["POST"])
+@orders_bp.route("/create", methods=["POST"])
 @login_required
 def create_order():
     try:
-        estado_text   = request.form["estado"]        # ahora tomamos el texto
-        nro_orden     = request.form["nro_orden"].strip()
-        cliente_id    = int(request.form["cliente_id"])
-        automovil_id  = int(request.form["automovil_id"])
-    except (KeyError, ValueError):
-        flash("Datos inválidos en el formulario.", "danger")
-        return redirect(url_for("orders.list_orders"))
+        # 1) datos principales
+        estado_id    = int(request.form["estado_orden"])
+        nro_orden    = request.form["nro_orden"].strip()
+        cliente_id   = int(request.form["cliente_id"])
+        automovil_id = int(request.form["automovil_id"])
 
-    orden = Orden(
-        cliente_id   = cliente_id,
-        fecha        = date.today(),
-        numero       = nro_orden,
-        usuario_id   = current_user.id,
-        automovil_id = automovil_id,
-        estado       = estado_text        # guardamos directamente el VARCHAR
-    )
-    db.session.add(orden)
-    db.session.flush()
+        # 2) crea la orden con fecha y usuario actual
+        orden = Orden(
+            cliente_id      = cliente_id,
+            fecha           = date.today(),
+            numero          = nro_orden,
+            usuario_id      = current_user.id,
+            automovil_id    = automovil_id,
+            estado_orden_id = estado_id
+        )
+        db.session.add(orden)
+        db.session.flush()
 
-    # Servicios
-    for sid, cant in zip(
-        request.form.getlist("servicio_id[]"),
-        request.form.getlist("servicio_cantidad[]")
-    ):
-        try:
+        # 3) servicios agregados
+        for sid, cant in zip(
+            request.form.getlist("servicio_id[]"),
+            request.form.getlist("servicio_cantidad[]")
+        ):
             sid_int = int(sid)
             qty     = int(cant)
-        except ValueError:
-            continue
-        if qty > 0:
-            orden.agregar_servicio(sid_int, qty)
+            if sid_int and qty > 0:
+                orden.agregar_servicio(sid_int, qty)
 
-    # Productos
-    for pid, cant in zip(
-        request.form.getlist("producto_id[]"),
-        request.form.getlist("producto_cantidad[]")
-    ):
-        try:
+        # 4) productos agregados
+        for pid, cant in zip(
+            request.form.getlist("producto_id[]"),
+            request.form.getlist("producto_cantidad[]")
+        ):
             pid_int = int(pid)
             qty     = int(cant)
-        except ValueError:
-            continue
-        if qty > 0:
-            orden.agregar_producto(pid_int, qty)
+            if pid_int and qty > 0:
+                orden.agregar_producto(pid_int, qty)
 
-    db.session.commit()
-    flash("Orden creada correctamente.", "success")
+        db.session.commit()
+        flash("Orden creada correctamente.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"No se pudo crear la orden: {e}", "danger")
+
     return redirect(url_for("orders.list_orders"))

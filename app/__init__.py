@@ -9,7 +9,7 @@ import app.extensions     as ext
 from app.extensions      import db, mail
 
 # blueprints
-from app.blueprints.main.routes     import main as main_bp
+from app.blueprints.main.routes import main as main_bp
 from app.blueprints.orders.routes   import orders_bp
 from app.blueprints.receipts.routes import receipts_bp
 from app.blueprints.products.routes import products_bp
