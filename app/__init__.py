@@ -1,58 +1,64 @@
 # app/__init__.py
 
-from flask               import Flask
-from flask_login         import LoginManager
-from itsdangerous        import URLSafeTimedSerializer
+from flask import Flask
+from flask_login import LoginManager
+from itsdangerous import URLSafeTimedSerializer
+from config import Config
+import app.extensions as ext
 
-from config              import Config
-import app.extensions     as ext
-from app.extensions      import db, mail
-
-# blueprints
-from app.blueprints.main.routes import main as main_bp
-from app.blueprints.orders.routes   import orders_bp
-from app.blueprints.receipts.routes import receipts_bp
-from app.blueprints.products.routes import products_bp
-from app.blueprints.products import products as products_bp
-
-# 1) Creamos el LoginManager **fuera** de create_app
+db = ext.db
+mail = ext.mail
 login_manager = LoginManager()
 
-
 def create_app():
-    # 2) Aquí dentro creamos la app
-    app = Flask(
-        __name__,
-        template_folder="templates",
-        static_folder="static"
-    )
+    app = Flask(__name__, template_folder="templates", static_folder="static")
     app.config.from_object(Config)
 
     # Inicializa extensiones
-    ext.db.init_app(app)
-    ext.mail.init_app(app)
-    serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
-    app.ts = serializer
-    
-    # 3) Ahora sí vinculamos login_manager con la app
+    db.init_app(app)
+    mail.init_app(app)
     login_manager.init_app(app)
     login_manager.login_view = "main.login"
     login_manager.login_message_category = "warning"
+    app.ts = URLSafeTimedSerializer(app.config["SECRET_KEY"])
 
-    # 4) Importa User **después** de haber cargado tus modelos
+    # User loader
     from app.models.usuario import User
     @login_manager.user_loader
     def load_user(user_id):
         return User.query.get(int(user_id))
 
-    # Registra blueprints
-    app.register_blueprint(main_bp)
-    app.register_blueprint(orders_bp)
-    app.register_blueprint(receipts_bp)
-    app.register_blueprint(products_bp)
+    # --- BLUEPRINTS: importa y registra UNA VEZ cada uno ---
 
-    # Crea tablas que falten
+    # Main
+    from app.blueprints.main.routes import main as main_bp
+    app.register_blueprint(main_bp)
+
+
+
+    # Productos
+    from app.blueprints.products import products  # importa el blueprint real
+    app.register_blueprint(products)            
+    
+    from app.blueprints.cliente.routes import cliente_bp
+    app.register_blueprint(cliente_bp)  # ya trae url_prefix="/clientes"
+
+
+
+    # Órdenes
+    from app.blueprints.orders.routes import orders_bp
+    app.register_blueprint(orders_bp, url_prefix="/ordenes")
+
+    # Comprobantes
+    from app.blueprints.comprobantes.routes import comprobantes_bp
+    app.register_blueprint(comprobantes_bp)
+
+    # Recibos
+    from app.blueprints.receipts.routes import receipts_bp
+    app.register_blueprint(receipts_bp)
+
+    # Crea tablas pendientes
     with app.app_context():
-        ext.db.create_all()
+        db.create_all()
 
     return app

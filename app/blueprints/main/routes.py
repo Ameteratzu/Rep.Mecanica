@@ -3,6 +3,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
 from flask_login   import login_user, login_required, logout_user, current_user
 from flask_mail    import Message
+from flask_sqlalchemy import SQLAlchemy
 from itsdangerous  import SignatureExpired, BadSignature
 from werkzeug.security import generate_password_hash
 from app.extensions      import db, mail
@@ -10,10 +11,14 @@ from app.models.usuario  import User
 from app.models.cliente import Cliente 
 from app.models.cliente import Cliente
 from app.models.ubigeo import Ubigeo
+from app.models.orden import Orden
+from app.models.comprobante import Comprobante
 from app.models import db, Persona, User  
 import io, csv
 from flask import send_file
 from . import main
+from config import Config
+import app.extensions as ext
 
 main = Blueprint("main", __name__)
 
@@ -143,38 +148,26 @@ def logout():
     return redirect(url_for("main.login"))
 
 
-#@main.route("/", methods=["GET"])
-#@login_required
-#def dashboard():
-    page     = request.args.get("page", 1, type=int)
-    per_page = 10
-
-    pagination = Cliente.query \
-        .order_by(Cliente.id.desc()) \
-        .paginate(page=page, per_page=per_page, error_out=False)
-
-    return render_template(
-        "cliente/list.html",
-        clientes=pagination.items,
-        pagination=pagination
-    )
-
 @main.route('/', methods=['GET'])
 @login_required
-def index():
-    page     = request.args.get('page', 1, type=int)
-    per_page = 10
+def dashboard():
+    # 1) Obtener la página actual desde la query string (por defecto es la 1)
+    page = request.args.get('page', 1, type=int)
 
+    # 2) Hacer la consulta paginada sobre el modelo Orden
     pagination = (
-        Cliente.query
-               .order_by(Cliente.id.desc())
-               .paginate(page=page, per_page=per_page, error_out=False)
+        Orden.query
+             .order_by(Orden.id.desc())
+             .paginate(page=page, per_page=10, error_out=False)
     )
+    reparaciones = pagination.items
 
+    # 3) Renderizar pasando 'pagination' y la lista de 'reparaciones'
     return render_template(
         'index.html',
-        clientes   = pagination.items,
-        pagination = pagination
+        reparaciones=reparaciones,
+        pagination=pagination,
+        active='dashboard'
     )
 
 
@@ -182,17 +175,18 @@ def index():
 @main.route('/clientes', methods=['GET'])
 @login_required
 def lista_clientes():
-    page     = request.args.get('page', 1, type=int)
-    pagination = Cliente.query.order_by(Cliente.id.desc())\
-                     .paginate(page=page, per_page=10, error_out=False)
-
-    ubigeos = Ubigeo.query.order_by(Ubigeo.departamento, Ubigeo.provincia, Ubigeo.distrito).all()
+    page      = request.args.get('page', 1, type=int)
+    pagination= Cliente.query.order_by(Cliente.id.desc()) \
+                            .paginate(page=page, per_page=10, error_out=False)
+    clientes  = pagination.items
+    ubigeos   = Ubigeo.query.order_by(Ubigeo.departamento, Ubigeo.provincia, Ubigeo.distrito).all()
     return render_template(
         'cliente/list.html',
-        clientes = pagination.items,
-        pagination= pagination,
-        ubigeos   = ubigeos
+        clientes=clientes,
+        pagination=pagination,
+        ubigeos=ubigeos  # <-- asegúrate que esto está
     )
+
 
 
 

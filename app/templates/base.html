@@ -19,6 +19,31 @@
     referrerpolicy="no-referrer"/>
 
   <style>
+  .sidebar .nav-link:hover:not(.active):not(.disabled) {
+    background: #f8f9fa;
+    color: #194989 !important;
+  }
+  .sidebar .nav-link.disabled {
+    color: #b1b7be !important;
+    background: none !important;
+    cursor: default;
+    pointer-events: none;
+    font-weight: normal;
+  }
+
+  .btn-logout {
+    position: absolute;
+    left: 5px;
+    bottom: 5px;
+    border-radius: 50px;
+    padding: 0.6em 1.4em;
+    width: 5%;
+    font-weight: bold;
+    box-shadow: 10 5px 6px rgba(0,0,0,0.10);
+    z-index: 200;
+    text-align: center;
+  }
+
     /* ▼ HEADER FIJO */
     .main-header {
       position: fixed;
@@ -98,55 +123,44 @@
     </div>
   </header>
 
-  <!-- SIDEBAR -->
-  <nav class="sidebar">
-    <h5 class="px-3 text-white">Administrador</h5>
-    <ul class="nav flex-column">
-      <li class="nav-item">
-        <a href="{{ url_for('main.index') }}"
-           class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}">
-          Inicio
-        </a>
-      </li>
-      <li class="nav-item">
-        <a href="{{ url_for('orders.list_orders') }}"
-           class="nav-link {% if request.endpoint.startswith('orders.') %}active{% endif %}">
-          Órdenes
-        </a>
-      </li>
-      <li class="nav-item">
-        <a href="{{ url_for('receipts.list_receipts') }}"
-           class="nav-link {% if request.endpoint.startswith('receipts.') %}active{% endif %}">
-          Comprobantes
-        </a>
-      </li>
-      <li class="nav-item">
-        <a href="{{ url_for('products.list_products') }}"
-           class="nav-link {% if request.endpoint.startswith('products.') %}active{% endif %}">
-          Productos
-        </a>
-      </li>
-      <li class="nav-item">
-        <a href="{{ url_for('main.lista_clientes') }}"
-           class="nav-link {% if request.endpoint == 'main.lista_clientes' %}active{% endif %}">
-          Clientes
-        </a>
-      </li>
-    </ul>
+ <!-- SIDEBAR -->
+<nav class="sidebar">
+  <h5 class="px-3 text-white">Administrador</h5>
+  <ul class="nav flex-column">
+    <li class="nav-item">
+      <a href="{{ url_for('main.dashboard') }}"
+         class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}">Inicio</a>
+    </li>
+    <li class="nav-item">
+      <a href="{{ url_for('orders.list_orders') }}"
+         class="nav-link {% if request.endpoint.startswith('orders.') %}active{% endif %}">Órdenes</a>
+    </li>
+    <li class="nav-item">
+      <a href="{{ url_for('receipts.list_receipts') }}"
+         class="nav-link {% if request.endpoint == 'receipts.list_receipts' %}active{% endif %}">Comprobantes</a>
+    </li>
+    <li class="nav-item">
+      <a href="{{ url_for('products.list_products') }}"
+         class="nav-link {% if request.endpoint.startswith('products.') %}active{% endif %}">Productos</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link disabled" tabindex="-1" aria-disabled="true" style="color:#b1b7be;pointer-events:none;">Clientes</a>
+      <!-- Si algún día quieres que funcione, quítale “disabled” y “pointer-events:none” -->
+    </li>
+  </ul>
+  <!-- Botón fijo abajo a la izquierda -->
+  <a href="{{ url_for('main.logout') }}" class="btn btn-danger btn-logout mt-auto">
+    <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+  </a>
+</nav>
 
-    <a href="{{ url_for('main.logout') }}" class="btn btn-logout">
-      <i class="fas fa-sign-out-alt"></i>
-    </a>
-  </nav>
-
-<<<<<<< HEAD
   <!-- CONTENIDO -->
   <main class="main-content">
     {% block content %}{% endblock %}
   </main>
 
   <!-- SCRIPTS -->
-=======
+
   <!-- Botón fijo Cerrar Sesión -->
   <ul class="nav flex-column">
     <li class="nav-item">
@@ -160,12 +174,8 @@
   </ul>
 
   <!-- Modal -->
-
-  
-
   
   <!-- Bootstrap JS Bundle -->
->>>>>>> 0a66df8b6f10f991df2583dbf77137d52fab6952
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
   {% block scripts %}{% endblock %}
 </body>

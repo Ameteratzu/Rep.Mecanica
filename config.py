@@ -12,7 +12,7 @@ class Config:
     SECURITY_PASSWORD_SALT = os.environ.get("SECURITY_PASSWORD_SALT", "otra-salt-larga")
 
     # Configuración de la base de datos
-    SQLALCHEMY_DATABASE_URI    = os.environ.get("DATABASE_URL", "mysql+pymysql://root:Danita2107@localhost:3306/Mecanica2")
+    SQLALCHEMY_DATABASE_URI    = os.environ.get("DATABASE_URL", "mysql+pymysql://root:@localhost:3307/Mecanica2")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # Configuración de Flask-Mail

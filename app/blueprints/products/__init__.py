@@ -1,10 +1,9 @@
 from flask import Blueprint
 
 products = Blueprint(
-    'products',               # nombre del endpoint
+    'products',
     __name__,
-    url_prefix='/productos',  # <<<< prefijo de ruta
+    url_prefix='/productos',
     template_folder='templates/products'
 )
-
-from . import routes
+from . import routes  # aquí, todas las rutas usan `@products.route(...)`

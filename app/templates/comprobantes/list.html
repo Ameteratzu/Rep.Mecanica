@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h1>Comprobantes</h1>
+  <ul>
+    {% for c in comprobantes %}
+      <li>
+        <strong>#{{ c.id }}</strong> — orden_id: {{ c.orden_id }}
+        total: {{ c.total }} — fecha: {{ c.fecha.strftime('%Y-%m-%d') }}
+      </li>
+    {% else %}
+      <li>No hay comprobantes registrados.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}
