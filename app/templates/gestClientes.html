@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestión de Clientes</title>
+    {% include 'includes/cdn_links.html' %}
+</head>
+
+<body class="bg-dark text-white">
+
+    {% include 'includes/header.html' %}
+
+    <div class="d-flex">
+        {% include 'includes/navbar.html' %}
+        <div class="main-content">
+            <h4>Gestión de Clientes</h4>
+            <hr />
+            <div class="mb-3 btn-bar">
+                <a href="{{ url_for('main.exportar_clientes_excel') }}" class="btn btn-success">
+                    <i class="fas fa-file-excel"></i> Exportar Excel
+                </a>
+                 <a href="/cliente/nuevo" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Nuevo
+                </a>
+            </div>
+
+           {% include 'includes/alerts.html' %}
+
+            <table id="tabla" class="table table-hover table-dark">
+                <thead>
+                    <tr>
+                        <th>Tipo Doc</th>
+                        <th>Nº Doc</th>
+                        <th>Nombre</th>
+                        <th>Apellidos</th>
+                        <th>Celular</th>
+                        <th>Estado</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cliente in clientes %}
+                    <tr>
+                        <td>{{ cliente.tipoDocumento }}</td>
+                        <td>{{ cliente.documento }}</td>
+                        <td>{{ cliente.nombres }}</td>
+                        <td>{{ cliente.apellidos }}</td>
+                        <td>{{ cliente.celular }}</td>
+                        <td>{{ 'Activo' if cliente.activo == 1 else 'Inactivo' }}</td>
+                        <td>
+                            <a href="{{ url_for('main.editar_cliente', cliente_id=cliente.id) }}"  class="btn btn-sm btn-warning">
+                                <i class="fas fa-pen"></i> Editar
+                            </a>
+
+                            <form action="{{ url_for('main.eliminar_cliente', cliente_id=cliente.id) }}" method="POST" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirmarEliminacion(event)">
+                                    <i class="fas fa-trash"></i> Eliminar
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% include 'includes/js_links.html' %}
+    
+    <script>
+        function confirmarEliminacion(event) {
+            event.preventDefault(); 
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "¡Este cliente será eliminado permanentemente!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    event.target.closest('form').submit();
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

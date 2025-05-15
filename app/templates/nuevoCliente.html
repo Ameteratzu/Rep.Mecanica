@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% if cliente.id %}Editar Cliente{% else %}Nuevo Cliente{% endif %}</title>
+    {% include 'includes/cdn_links.html' %}
+</head>
+
+<body class="bg-dark text-white">
+
+    {% include 'includes/header.html' %}
+
+    <div class="d-flex">
+        {% include 'includes/navbar.html' %}
+        <div class="main-content">
+
+            {% include 'includes/alerts.html' %}
+
+            <div class="container mt-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h3>{% if cliente.id %}Editar Cliente{% else %}Nuevo Cliente{% endif %}</h3>
+                        <hr />
+                        <form action="{{ url_for('main.guardar_cliente') }}" method="POST">
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="tipo_documento">Tipo de Documento</label>
+                                    <select class="form-control" id="tipoDocumento" name="tipoDocumento" required>
+                                        <option value="">::: Seleccione :::</option>
+                                        <option value="DNI" {% if cliente.tipoDocumento == 'DNI' %}selected{% endif %}>DNI</option>
+                                        <option value="Carnet de Extranjería" {% if cliente.tipoDocumento == 'Carnet de Extranjería' %}selected{% endif %}>Carnet de Extranjería</option>
+                                        <option value="Pasaporte" {% if cliente.tipoDocumento == 'Pasaporte' %}selected{% endif %}>Pasaporte</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="documento">Número de Documento</label>
+                                    <input type="text" class="form-control" id="documento" name="documento"
+                                        value="{{ cliente.documento }}" required>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="nombres">Nombres</label>
+                                    <input type="text" class="form-control" id="nombres" name="nombres"
+                                        value="{{ cliente.nombres }}" required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="apellidos">Apellidos</label>
+                                    <input type="text" class="form-control" id="apellidos" name="apellidos"
+                                        value="{{ cliente.apellidos }}" required>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <label for="direccion">Dirección</label>
+                                <input type="text" class="form-control" id="direccion" name="direccion"
+                                    value="{{ cliente.direccion }}" required>
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group col-md-4">
+                                    <label for="celular">Celular</label>
+                                    <input type="text" class="form-control" id="celular" name="celular"
+                                        value="{{ cliente.celular }}" required>
+                                </div>
+
+                                <div class="form-group col-md-4">
+                                    <label for="ubigeo">Distrito</label>
+                                    <select class="form-control" id="ubigeo" name="ubigeo" required>
+                                        <option value="">::: Seleccione :::</option>
+                                        {% for u in ubigeos %}
+                                        <option value="{{ u.id }}" {% if cliente.ubigeoId==u.id %}selected{% endif %}>
+                                            {{ u.departamento }}/{{ u.provincia }}/{{ u.distrito }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div class="form-group col-md-4">
+                                    <label for="estado">Estado</label>
+                                    <select class="form-control" id="activo" name="activo">
+                                        <option value="1" {% if cliente.activo==1 %}selected{% endif %}>Activo</option>
+                                        <option value="0" {% if cliente.activo==0 %}selected{% endif %}>Inactivo
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            {% if cliente.id %}
+                            <input type="hidden" name="id" value="{{ cliente.id }}">
+                            {% endif %}
+
+                            <br />
+                            <button type="submit" class="btn btn-primary">Guardar</button>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    {% include 'includes/js_links.html' %}
+
+</body>
+
+</html>
