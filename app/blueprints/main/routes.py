@@ -1,17 +1,16 @@
 # app/blueprints/main/routes.py
 
-from flask import Blueprint, render_template, request, redirect, url_for, flash
-from flask_login   import login_user, login_required, logout_user, current_user
-from flask_mail    import Message
-from itsdangerous  import SignatureExpired, BadSignature
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
+from flask_login import login_user, login_required, logout_user, current_user
+from flask_mail import Message
+from itsdangerous import SignatureExpired, BadSignature
 from werkzeug.security import generate_password_hash
-from app.extensions      import db, mail
-from app.models.usuario  import User
-from app.models.cliente import Cliente 
-from app.models import db, Persona, User  
+from app.extensions import db, mail
+from app.models.usuario import User
+from app.models.persona import Persona
+from app.models.cliente import Cliente
 
-main = Blueprint("main", __name__)
-
+main = Blueprint("main", __name__, template_folder="templates/main")
 
 @main.route("/login", methods=["GET", "POST"])
 def login():
@@ -19,7 +18,7 @@ def login():
         return redirect(url_for("main.dashboard"))
 
     if request.method == "POST":
-        email    = request.form["email"].strip().lower()
+        email = request.form["email"].strip().lower()
         password = request.form["password"]
         user = User.query.filter_by(email=email, active=True).first()
         if user and user.check_password(password):
@@ -29,13 +28,12 @@ def login():
 
     return render_template("login.html")
 
-
 @main.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        nombres = request.form['nombres']
-        apellidos = request.form['apellidos']
-        email = request.form['email']
+        nombres = request.form['nombres'].strip()
+        apellidos = request.form['apellidos'].strip()
+        email = request.form['email'].strip().lower()
         password = request.form['password']
         password2 = request.form['password2']
 
@@ -43,9 +41,8 @@ def register():
             flash("Las contraseñas no coinciden.", "danger")
             return redirect(url_for('main.register'))
 
-        # Crear Persona
         nueva_persona = Persona(
-            documento="00000000",  # reemplaza o haz que lo ingresen en el form
+            documento="00000000",
             nombres=nombres,
             apellidos=apellidos,
             correo=email,
@@ -55,7 +52,6 @@ def register():
         db.session.add(nueva_persona)
         db.session.commit()
 
-        # Crear Usuario
         nuevo_usuario = User(
             email=email,
             password_hash=generate_password_hash(password),
@@ -70,8 +66,6 @@ def register():
 
     return render_template("register.html")
 
-
-
 @main.route("/forgot", methods=["GET", "POST"])
 def forgot():
     if current_user.is_authenticated:
@@ -79,12 +73,12 @@ def forgot():
 
     if request.method == "POST":
         email = request.form["email"].strip().lower()
-        token = current_app.ts.dumps(email, salt=current_app.config["SECURITY_PASSWORD_SALT"])
+        token = current_app.ts.dumps(email, salt=current_app.config["SECURITY_SALT"])
         reset_url = url_for("main.reset_with_token", token=token, _external=True)
 
         msg = Message(
-            subject=current_app.config["MAIL_SUBJECT_PREFIX"]+" Restablece tu contraseña",
-            sender=current_app.config["MAIL_DEFAULT_SENDER"],
+            subject=current_app.config.get("MAIL_SUBJECT_PREFIX", "") + " Restablece tu contraseña",
+            sender=current_app.config.get("MAIL_DEFAULT_SENDER"),
             recipients=[email]
         )
         msg.body = (
@@ -98,20 +92,18 @@ def forgot():
 
     return render_template("forgot.html")
 
-
 @main.route("/reset/<token>", methods=["GET", "POST"])
 def reset_with_token(token):
     if current_user.is_authenticated:
         return redirect(url_for("main.dashboard"))
 
     try:
-        email = current_app.ts.loads(token, salt=current_app.config["SECURITY_PASSWORD_SALT"],max_age=3600)
+        email = current_app.ts.loads(token, salt=current_app.config["SECURITY_SALT"], max_age=3600)
     except (SignatureExpired, BadSignature):
         flash("El enlace no es válido o ha expirado.", "danger")
         return redirect(url_for("main.forgot"))
 
     user = User.query.filter_by(email=email).first()
-
     if not user:
         flash("No existe ningún usuario con ese correo.", "warning")
         return redirect(url_for("main.register"))
@@ -130,55 +122,42 @@ def reset_with_token(token):
 
     return render_template("reset.html", token=token)
 
-
 @main.route("/logout")
 @login_required
 def logout():
     logout_user()
     return redirect(url_for("main.login"))
 
-
 @main.route("/", methods=["GET"])
 @login_required
 def dashboard():
-    # Paginar clientes
     page     = request.args.get("page", 1, type=int)
     per_page = 10
-    pagination = Cliente.query \
-        .order_by(Cliente.id.desc()) \
-        .paginate(page=page, per_page=per_page, error_out=False)
-    clients = pagination.items
-
+    pagination = Cliente.query.order_by(Cliente.id.desc()).paginate(page=page, per_page=per_page, error_out=False)
     return render_template(
         "index.html",
-        clients    = clients,
-        pagination = pagination
+        clients=pagination.items,
+        pagination=pagination
     )
 
 @main.route("/clientes/nuevo", methods=["POST"])
 @login_required
 def create_client():
-    """
-    Procesa el POST desde el modal de 'Agregar' en el dashboard.
-    """
     documento = request.form.get("documento", "").strip()
     nombres   = request.form.get("nombres",   "").strip()
     apellidos = request.form.get("apellidos", "").strip()
     correo    = request.form.get("correo",    "").strip().lower()
     celular   = request.form.get("celular",   "").strip()
 
-    # Validación mínima
     if not documento or not nombres or not apellidos or not correo:
         flash("Todos los campos son obligatorios.", "warning")
         return redirect(url_for("main.dashboard", page=request.args.get("page", 1)))
 
-    # Crea y guarda el Cliente
     cliente = Cliente(
         documento=documento,
         nombres=nombres,
         apellidos=apellidos,
-        correo=correo,
-        ubigeo_id=1,     # Ajusta según tu lógica
+        ubigeo_id=1,
         direccion="",
         celular=celular
     )
