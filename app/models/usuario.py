@@ -12,7 +12,7 @@ class User(UserMixin, db.Model):
 
     persona_id = db.Column(db.Integer, db.ForeignKey("personas.id"), nullable=False)
 
-    ordenes = db.relationship("Orden", back_populates="usuario")
+    ordenes = db.relationship('Orden', back_populates='usuario', lazy=True)
 
     def set_password(self, pw):
         self.password_hash = generate_password_hash(pw)

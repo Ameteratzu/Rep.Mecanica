@@ -18,7 +18,8 @@ class Cliente(db.Model):
     automoviles = db.relationship("Automovil", back_populates="cliente")
 
     # Relación con Órdenes
-    ordenes     = db.relationship("Orden",     back_populates="cliente")
+    ordenes = db.relationship('Orden', back_populates='cliente', lazy=True)
+
 
     def __repr__(self):
         return f"<Cliente {self.id} – {self.nombres} {self.apellidos}>"

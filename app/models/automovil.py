@@ -18,7 +18,7 @@ class Automovil(db.Model):
     cliente     = db.relationship("Cliente",    back_populates="automoviles")
 
     # Relación **bidireccional** con Orden
-    ordenes     = db.relationship("Orden",      back_populates="automovil")
+    ordenes = db.relationship('Orden', back_populates='automovil', lazy=True)
 
     def __repr__(self):
         return f"<Automovil {self.id} – {self.placa}>"
