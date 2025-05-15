@@ -58,21 +58,15 @@
       <!-- Herramientas: Exportar, Nuevo y Búsqueda -->
       <div class="d-flex justify-content-between align-items-center mb-3">
         <div class="btn-group">
-           <a href="{{ url_for('products.list_products', page=pagination.page) }}" class="btn btn-success">Exportar</a>
+           <a href="{{ url_for('products.export_products_excel') }}" class="btn btn-success">Exportar</a>
           <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevoProductoModal">
             Nuevo
           </button>
         </div>
-        <form class="d-flex" method="get" action="{{ url_for('products.list_products') }}">
-          <input
-            type="text"
-            name="search"
-            class="form-control me-2"
-            placeholder="Código, Nombre, Marca"
-            value="{{ request.args.get('search','') }}"
-          >
-          <button class="btn btn-primary" type="submit">Buscar</button>
-        </form>
+          <form class="d-flex" method="get" action="{{ url_for('products.list_products') }}">
+              <input type="text" name="search" class="form-control" value="{{ search or '' }}" placeholder="Código, Nombre, Marca">
+              <button class="btn btn-primary ms-2" type="submit">Buscar</button>
+          </form>
       </div>
     </div>
   </div>
@@ -80,11 +74,11 @@
 
   <div class="mb-3">
     <label for="filter-state" class="form-label">Filtrar por estado:</label>
-    <select id="filter-state" class="form-select w-auto">
-      <option value="all">Todos</option>
-      <option value="active">Activo</option>
-      <option value="inactive">Inactivo</option>
-    </select>
+      <select name="estado" class="form-select" onchange="this.form.submit()">
+        <option value="Todos" {% if estado == 'Todos' %}selected{% endif %}>Todos</option>
+        <option value="Activo" {% if estado == 'Activo' %}selected{% endif %}>Activo</option>
+        <option value="Inactivo" {% if estado == 'Inactivo' %}selected{% endif %}>Inactivo</option>
+      </select>
   </div>
 
   <table class="table table-hover table-striped">
@@ -106,15 +100,23 @@
       <td>{{ p.codigo }}</td>
       <td>{{ p.nombre }}</td>
       <td>{{ p.marca }}</td>
-      <td>S/. {{ '%.2f'|format(p.precio) }}</td>
+      <td>S/. {{ "%.2f"|format(p.precio) }}</td>
       <td>{{ 'Activo' if p.activo else 'Inactivo' }}</td>
       <td>
-        <!-- Botones editar/eliminar igual que clientes -->
+        <a href="{{ url_for('products.edit_product', product_id=p.id) }}"
+          class="btn btn-sm btn-warning" title="Editar">
+          <i class="fas fa-edit"></i>
+        </a>
+        <form action="{{ url_for('products.delete_product', product_id=p.id) }}"
+              method="post" style="display:inline">
+          <button type="submit"
+                  class="btn btn-sm btn-danger"
+                  onclick="return confirm('¿Estás seguro de eliminar este producto?')"
+                  title="Eliminar">
+            <i class="fas fa-trash"></i>
+          </button>
+        </form>
       </td>
-    </tr>
-    {% else %}
-    <tr>
-      <td colspan="7" class="text-center">No hay productos registrados.</td>
     </tr>
     {% endfor %}
   </tbody>
@@ -124,21 +126,22 @@
   <nav aria-label="Paginación de productos">
     <ul class="pagination">
       {% if pagination.has_prev %}
-      <li class="page-item"><a class="page-link" href="{{ url_for('products.list_products', page=pagination.prev_num) }}">← Anterior</a></li>
+      <li class="page-item"><a class="page-link" href="{{ url_for('products.list_products', page=p, search=search, estado=estado) }}">{{ p }}</a></li>
       {% else %}
       <li class="page-item disabled"><span class="page-link">← Anterior</span></li>
       {% endif %}
       {% for num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
         {% if num %}
         <li class="page-item {% if num==pagination.page %}active{% endif %}">
-          <a class="page-link" href="{{ url_for('products.list_products', page=num) }}">{{ num }}</a>
+          <a class="page-link" href="{{ url_for('products.list_products', page=p, search=search, estado=estado) }}">{{ p }}</a>
+
         </li>
         {% else %}
         <li class="page-item disabled"><span class="page-link">…</span></li>
         {% endif %}
       {% endfor %}
       {% if pagination.has_next %}
-      <li class="page-item"><a class="page-link" href="{{ url_for('products.list_products', page=pagination.next_num) }}">Siguiente →</a></li>
+      <li class="page-item"><a class="page-link" href="{{ url_for('products.list_products', page=p, search=search, estado=estado) }}">{{ p }}</a> </li>
       {% else %}
       <li class="page-item disabled"><span class="page-link">Siguiente →</span></li>
       {% endif %}

@@ -188,9 +188,6 @@ def lista_clientes():
     )
 
 
-
-
-
 @main.route('/clientes/nuevo', methods=['POST'])
 @login_required
 def nuevo_cliente():
