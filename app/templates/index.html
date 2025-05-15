@@ -40,6 +40,8 @@
       color: white;
       height: 100vh;
       padding: 15px;
+      display: flex;
+      flex-direction: column;
     }
     .sidebar .nav-link {
       color: #adb5bd;
@@ -146,6 +148,11 @@
           <a href="{{ url_for('products.list_products') }}" class="nav-link">Productos</a>
         </li>
       </ul>
+      <ul class="nav flex-column mt-auto" style="margin-bottom: 20px;">
+        <li class="nav-item">
+          <a href="{{ url_for('main.dashboard') }}" class="nav-link" data-bs-toggle="modal"
+             data-bs-target="#logoutModal" style="border-bottom: 0.1em solid white;">Cerrar sesión</a>
+        </li>
     </nav>
 
     <!-- Contenido principal -->
@@ -288,12 +295,24 @@
   </div>
 
   <!-- Botón fijo Cerrar Sesión -->
-  <a
-    href="{{ url_for('main.logout') }}"
-    class="btn btn-danger btn-logout"
-  >
-    Cerrar sesión
-  </a>
+
+  <div class="modal fade" id="logoutModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content p-2">
+        <div class="modal-header text-dark">
+          <h5 class="modal-title">Confirmar cierre de sesión</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          ¿Está seguro que desea cerrar la sesión?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+          <a href="{{ url_for('main.logout') }}" class="btn btn-danger">Si</a>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
