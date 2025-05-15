@@ -1,12 +1,12 @@
-def create_app():
-    app = Flask(__name__)
-    app.config.from_object(Config)
+from flask import Blueprint
 
-    # Inicializar extensiones
-    db.init_app(app)
+# Definimos aquí el blueprint 'main' y luego lo importamos en routes.py
+main = Blueprint(
+    'main',
+    __name__,
+    template_folder='templates',
+    static_folder='static'
+)
 
-    # Registrar Blueprints
-    from app.blueprints.main.routes import main as main_bp
-    app.register_blueprint(main_bp)
-
-    return app
+# Importa las rutas para registrarlas en el blueprint
+from . import routes  # NO cambies esto por from .routes import main

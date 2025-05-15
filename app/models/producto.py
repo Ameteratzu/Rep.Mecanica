@@ -1,4 +1,4 @@
-# app/models/producto.py
+# app/modelsproducts.list_productso.py
 
 from app.extensions import db
 

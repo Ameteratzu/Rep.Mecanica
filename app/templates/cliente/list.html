@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+{% block title %}Gestión de Clientes – TECMECH{% endblock %}
+
+{% block content %}
+  <h4>Gestión de Clientes</h4>
+  <hr>
+
+  <div class="mb-3 d-flex gap-2">
+    <a href="{{ url_for('main.exportar_clientes_excel') }}" class="btn btn-success">
+      <i class="fas fa-file-excel"></i> Exportar Excel
+    </a>
+    <!-- Botón Nuevo dispara el modal -->
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#clientModal">
+      Nuevo
+    </button>
+  </div>
+
+  {% include 'includes/alerts.html' %}
+
+  <table id="clientes-table" class="table table-hover">
+    <thead>
+      <tr>
+        <th>Tipo Doc</th>
+        <th>Nº Doc</th>
+        <th>Nombre</th>
+        <th>Apellidos</th>
+        <th>Celular</th>
+        <th>Estado</th>
+        <th>Acción</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in clientes %}
+      <tr>
+        <td>{{ c.tipo_documento }}</td>
+        <td>{{ c.documento }}</td>
+        <td>{{ c.nombres }}</td>
+        <td>{{ c.apellidos }}</td>
+        <td>{{ c.celular }}</td>
+        <td>{{ 'Activo' if c.activo else 'Inactivo' }}</td>
+        <td>
+          <a href="{{ url_for('main.editar_cliente', cliente_id=c.id) }}"
+             class="btn btn-sm btn-warning">Editar</a>
+          <form action="{{ url_for('main.eliminar_cliente', cliente_id=c.id) }}"
+                method="post" style="display:inline">
+            <button type="submit" class="btn btn-sm btn-danger"
+                    onclick="return confirm('¿Estás seguro de eliminar este cliente?')">
+              Eliminar
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="7" class="text-center">No hay clientes registrados.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if pagination %}
+  <nav aria-label="Paginación de clientes">
+    <ul class="pagination">
+      {% if pagination.has_prev %}
+      <li class="page-item">
+        <a class="page-link"
+           href="{{ url_for('main.lista_clientes', page=pagination.prev_num) }}">
+          ← Anterior
+        </a>
+      </li>
+      {% endif %}
+      {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+        {% if p %}
+        <li class="page-item {% if p == pagination.page %}active{% endif %}">
+          <a class="page-link"
+             href="{{ url_for('main.lista_clientes', page=p) }}">{{ p }}</a>
+        </li>
+        {% endif %}
+      {% endfor %}
+      {% if pagination.has_next %}
+      <li class="page-item">
+        <a class="page-link"
+           href="{{ url_for('main.lista_clientes', page=pagination.next_num) }}">
+          Siguiente →
+        </a>
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+
+  <!-- Modal: Crear Cliente -->
+  <div class="modal fade" id="clientModal" tabindex="-1" aria-labelledby="clientModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content text-dark">
+        <div class="modal-header">
+          <h5 class="modal-title" id="clientModalLabel">Crear Cliente</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <form method="post" action="{{ url_for('main.nuevo_cliente') }}">
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label">Tipo de Documento</label>
+                <select class="form-select" name="tipoDocumento" required>
+                  <option value="">::: Seleccione :::</option>
+                  <option value="DNI">DNI</option>
+                  <option value="Carnet de Extranjería">Carnet de Extranjería</option>
+                  <option value="Pasaporte">Pasaporte</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Nº Documento</label>
+                <input type="text" class="form-control" name="documento" required>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Celular</label>
+                <input type="text" class="form-control" name="celular">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Nombres</label>
+                <input type="text" class="form-control" name="nombres" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Apellidos</label>
+                <input type="text" class="form-control" name="apellidos" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Correo</label>
+                <input type="email" class="form-control" name="correo">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Dirección</label>
+                <input type="text" class="form-control" name="direccion">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Distrito</label>
+                <select class="form-select" name="ubigeo" required>
+                  <option value="">::: Seleccione :::</option>
+                  {% for u in ubigeos %}
+                  <option value="{{ u.id }}">
+                    {{ u.departamento }}/{{ u.provincia }}/{{ u.distrito }}
+                  </option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Estado</label>
+                <select class="form-select" name="activo" required>
+                  <option value="1">Activo</option>
+                  <option value="0">Inactivo</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    $('#clientes-table').DataTable({
+      pageLength: 10,
+      lengthChange: true,
+      searching: true
+    });
+  });
+</script>
+{% endblock %}

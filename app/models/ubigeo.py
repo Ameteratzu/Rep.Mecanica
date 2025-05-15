@@ -5,16 +5,16 @@ from app.extensions import db
 class Ubigeo(db.Model):
     __tablename__ = "ubigeos"
 
-    id           = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    codigo       = db.Column(db.String(6), nullable=False, unique=True)
-    departamento = db.Column(db.String(50), nullable=False)
-    provincia    = db.Column(db.String(50), nullable=False)
-    distrito     = db.Column(db.String(50), nullable=False)
+    id          = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    codigo      = db.Column(db.String(20), unique=True)
+    departamento= db.Column(db.String(100))
+    provincia   = db.Column(db.String(100))
+    distrito    = db.Column(db.String(100))
 
-    # Relación inversa con Cliente (opcional)
+    # Relación inversa a Cliente
     clientes = db.relationship(
-        'Cliente',
-        back_populates='ubigeo',
+        "Cliente",
+        back_populates="ubigeo",
         lazy=True
     )
 

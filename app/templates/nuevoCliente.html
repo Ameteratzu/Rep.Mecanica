@@ -23,7 +23,7 @@
                     <div class="card-body">
                         <h3>{% if cliente.id %}Editar Cliente{% else %}Nuevo Cliente{% endif %}</h3>
                         <hr />
-                        <form action="{{ url_for('main.guardar_cliente') }}" method="POST">
+                        <form action="{{ url_for('main.nuevo_cliente') }}" method="POST">
                             <div class="row">
                                 <div class="form-group col-md-6">
                                     <label for="tipo_documento">Tipo de Documento</label>

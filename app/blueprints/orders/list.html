@@ -1,7 +1,9 @@
 {% extends "base.html" %}
+{% block title %}Listado de Órdenes – TECMECH{% endblock %}
 
 {% block content %}
   <h2>Listado de Órdenes</h2>
+  <hr/>
 
   <table class="table table-hover">
     <thead>
@@ -21,9 +23,13 @@
         <td>{{ orden.fecha.strftime('%Y-%m-%d') }}</td>
         <td>{{ orden.estado }}</td>
         <td>
-          <a href="{{ url_for('orders.edit_order', order_id=orden.id, page=pagination.page) }}"
+          <a href="{{ url_for('orders.edit_order',
+                              order_id=orden.id,
+                              page=pagination.page) }}"
              class="btn btn-sm btn-warning">Editar</a>
-          <form action="{{ url_for('orders.delete_order', order_id=orden.id) }}"
+          <form action="{{ url_for('orders.delete_order',
+                                    order_id=orden.id,
+                                    page=pagination.page) }}"
                 method="post" style="display:inline">
             <button type="submit"
                     class="btn btn-sm btn-danger"
@@ -33,11 +39,16 @@
           </form>
         </td>
       </tr>
+      {% else %}
+      <tr>
+        <td colspan="5" class="text-center">No hay órdenes registradas.</td>
+      </tr>
       {% endfor %}
     </tbody>
   </table>
 
-  <nav>
+  {% if pagination %}
+  <nav aria-label="Paginación de órdenes">
     <ul class="pagination">
       {% if pagination.has_prev %}
       <li class="page-item">
@@ -54,16 +65,12 @@
 
       {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
         {% if p %}
-          {% if p == pagination.page %}
-          <li class="page-item active">
-            <span class="page-link">{{ p }}</span>
-          </li>
-          {% else %}
-          <li class="page-item">
-            <a class="page-link"
-               href="{{ url_for('orders.list_orders', page=p) }}">{{ p }}</a>
-          </li>
-          {% endif %}
+        <li class="page-item {% if p == pagination.page %}active{% endif %}">
+          <a class="page-link"
+             href="{{ url_for('orders.list_orders', page=p) }}">
+            {{ p }}
+          </a>
+        </li>
         {% else %}
         <li class="page-item disabled">
           <span class="page-link">…</span>
@@ -85,4 +92,5 @@
       {% endif %}
     </ul>
   </nav>
+  {% endif %}
 {% endblock %}

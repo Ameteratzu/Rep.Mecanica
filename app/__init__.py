@@ -13,6 +13,7 @@ from app.blueprints.main.routes import main as main_bp
 from app.blueprints.orders.routes   import orders_bp
 from app.blueprints.receipts.routes import receipts_bp
 from app.blueprints.products.routes import products_bp
+from app.blueprints.products import products as products_bp
 
 # 1) Creamos el LoginManager **fuera** de create_app
 login_manager = LoginManager()
