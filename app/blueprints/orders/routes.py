@@ -88,3 +88,32 @@ def create_order():
         flash(f"No se pudo crear la orden: {e}", "danger")
 
     return redirect(url_for("orders.list_orders"))
+
+@orders_bp.route("/<int:order_id>/edit", methods=["GET", "POST"])
+@login_required
+def edit_order(order_id):
+    orden = Orden.query.get_or_404(order_id)
+
+    if request.method == "POST":
+        # Aquí actualizas los campos según el formulario
+        orden.estado_orden_id = int(request.form["estado_orden"])
+        db.session.commit()
+        flash("Orden actualizada correctamente.", "success")
+        return redirect(url_for("orders.list_orders"))
+
+    estados = EstadoOrden.query.filter_by(activo=True).all()
+    return render_template("orders/edit.html", orden=orden, estados=estados)
+
+@orders_bp.route("/<int:order_id>/delete", methods=["POST"])
+@login_required
+def delete_order(order_id):
+    orden = Orden.query.get_or_404(order_id)
+    try:
+        db.session.delete(orden)
+        db.session.commit()
+        flash("Orden eliminada correctamente.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"No se pudo eliminar la orden: {e}", "danger")
+    return redirect(url_for("orders.list_orders"))
+
