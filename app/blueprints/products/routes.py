@@ -29,36 +29,6 @@ def list_products():
         pagination=pagination,
         categorias=categorias
     )
-@products.route('/crear', methods=['POST'])
-def create_product():
-    codigo = request.form.get('codigo')
-    nombre = request.form.get('nombre')
-    marca = request.form.get('marca')
-    precio = request.form.get('precio')
-    categoria_id = request.form.get('categoria_id')
-    activo = request.form.get('activo')
-    file = request.files.get('imagen')
-
-    # Guardar imagen si existe
-    filename = None
-    if file and file.filename != '':
-        filename = secure_filename(file.filename)
-        image_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-        file.save(image_path)
-
-    nuevo_producto = Producto(
-        codigo=codigo,
-        nombre=nombre,
-        marca=marca,
-        precio=precio,
-        categoria_id=categoria_id,
-        activo=bool(int(activo)),
-        imagen=filename   # Debe estar este campo en tu modelo Producto
-    )
-    db.session.add(nuevo_producto)
-    db.session.commit()
-    flash('Producto agregado exitosamente', 'success')
-    return redirect(url_for('products.list_products'))
 
 @products.route('/<int:product_id>/editar', methods=['GET','POST'])
 @login_required
