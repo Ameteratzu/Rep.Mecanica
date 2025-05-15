@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Panel de Administración</h1>
+    <div class="row">
+        <div class="col-md-3 mb-3">
+            <a href="{{ url_for('admin.gestionar_usuarios') }}" class="btn btn-primary w-100">Usuarios</a>
+        </div>
+        <div class="col-md-3 mb-3">
+            <a href="{{ url_for('admin.gestionar_roles') }}" class="btn btn-secondary w-100">Roles</a>
+        </div>
+        <div class="col-md-3 mb-3">
+            <a href="{{ url_for('admin.gestionar_inventario') }}" class="btn btn-info w-100">Inventario</a>
+        </div>
+        <div class="col-md-3 mb-3">
+            <a href="{{ url_for('admin.gestionar_servicios') }}" class="btn btn-success w-100">Servicios</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

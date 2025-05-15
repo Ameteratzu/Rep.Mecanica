@@ -34,6 +34,21 @@ def create_app():
     from app.blueprints.main.routes import main as main_bp
     app.register_blueprint(main_bp)
 
+    # Registrar blueprint
+    from app.blueprints.admin.usuarios import usuarios_bp
+    app.register_blueprint(usuarios_bp)
+
+    #Registrar ambos blueprints
+    from app.blueprints.admin.roles import roles_bp
+    from app.blueprints.admin.usuarios import usuarios_bp
+    app.register_blueprint(roles_bp)
+    app.register_blueprint(usuarios_bp)
+
+    #Registrar los blueprints
+    from app.blueprints.admin.inventario import inventario_bp
+    from app.blueprints.admin.servicios import servicios_bp
+    app.register_blueprint(inventario_bp)
+    app.register_blueprint(servicios_bp)
 
 
     # Productos
@@ -43,7 +58,12 @@ def create_app():
     from app.blueprints.cliente.routes import cliente_bp
     app.register_blueprint(cliente_bp)  # ya trae url_prefix="/clientes"
 
+    from app.blueprints.main.routes import admin as admin_bp
+    app.register_blueprint(admin_bp)
 
+    #registra blueprint de roles
+    from app.blueprints.admin.roles import roles_bp
+    app.register_blueprint(roles_bp)
 
     # Órdenes
     from app.blueprints.orders.routes import orders_bp

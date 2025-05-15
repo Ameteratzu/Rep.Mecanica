@@ -15,12 +15,20 @@ from app.models.orden import Orden
 from app.models.comprobante import Comprobante
 from app.models import db, Persona, User  
 import io, csv
+from app.decorators import roles_requeridos
 from flask import send_file
 from . import main
 from config import Config
 import app.extensions as ext
 
-main = Blueprint("main", __name__)
+admin = Blueprint('admin', __name__)
+
+
+@admin.route('/admin/panel')
+@login_required
+@roles_requeridos('administrador')
+def admin_panel():
+    return render_template('admin/panel.html')
 
 
 @main.route("/login", methods=["GET", "POST"])

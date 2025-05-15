@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Resetear Contraseña de {{ usuario.persona.nombres }} {{ usuario.persona.apellidos }}</h2>
+    <form method="POST">
+        <div class="mb-3">
+            <label>Nueva Contraseña:</label>
+            <input type="password" name="password" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label>Confirmar Contraseña:</label>
+            <input type="password" name="password2" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Actualizar</button>
+        <a href="{{ url_for('admin_usuarios.lista_usuarios') }}" class="btn btn-secondary">Volver</a>
+    </form>
+</div>
+{% endblock %}
