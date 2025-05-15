@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Gestión de Clientes – TECMECH{% endblock %}
 
+<<<<<<< HEAD
 {% block content %}
   <h4>Gestión de Clientes</h4>
   <hr>
@@ -12,6 +13,222 @@
     <a href="{{ url_for('main.nuevo_cliente') }}" class="btn btn-primary">
       <i class="fas fa-plus"></i> Nuevo
     </a>
+=======
+    /* Barra lateral */
+    .sidebar {
+      background-color: #194989;
+      color: white;
+      height: 100vh;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+    }
+    .sidebar .nav-link {
+      color: #adb5bd;
+    }
+    .sidebar a:hover {
+      background-color: white;
+      color: #000 !important;
+    }
+    .sidebar a {
+      color: white !important;
+      border-bottom: 0.1em solid white;
+    }
+    .sidebar .nav-link.active {
+      color: white;
+      font-weight: bold;
+    }
+
+    /* Contenido principal */
+    .main-content {
+      background-color: white;
+      margin-left: 0;
+      padding: 2.8em;
+      width: 100%;
+      color: #000;
+    }
+
+    /* Tabla */
+    table {
+      color: black;
+    }
+    table thead {
+      background-color: #495057;
+      color: white;
+    }
+
+    /* Búsqueda y botones */
+    .buscador-general {
+      border-radius: 2em;
+      border-color: #000;
+    }
+    .btn {
+      border-radius: 0 !important;
+    }
+    .btn-primary:hover {
+      background-color: white !important;
+      color: #000;
+    }
+    .btnauxiliar button {
+      width: 100%;
+      border-radius: 0;
+    }
+    select {
+      border-radius: 3em;
+      border-color: #000;
+    }
+
+    /* Botón fijo de logout */
+    .btn-logout {
+    position: fixed;        
+    bottom: 20px;          
+    left: 35px;             
+    padding: 0.5rem 1rem;  
+    border: 1px solid #800303;
+    border-radius: 100%;        
+    background-color: #dc3545; /* rojo */
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center; 
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    z-index: 1000;
+    text-decoration: none
+    }
+  </style>
+</head>
+<body class="bg-dark text-white">
+
+  <!-- Encabezado principal -->
+  <header class="main-header">
+    <div class="logo">TECMECH</div>
+    <div class="user-info">
+      <span>
+        <strong>{{ current_user.email }}</strong><br>
+      </span>
+      <img src="https://via.placeholder.com/40" alt="User Icon">
+    </div>
+  </header>
+
+  <div class="d-flex">
+    <!-- Barra lateral -->
+    <nav class="sidebar">
+      <h5 class="m-4">Administrador</h5>
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a href="{{ url_for('main.dashboard') }}" class="nav-link active">Reparaciones</a>
+        </li>
+        <li class="nav-item">
+          <a href="{{ url_for('orders.list_orders') }}" class="nav-link">Órdenes</a>
+        </li>
+        <li class="nav-item">
+          <a href="#" class="nav-link">Comprobantes</a>
+        </li>
+        <li class="nav-item">
+          <a href="{{ url_for('products.list_products') }}" class="nav-link">Productos</a>
+        </li>
+      </ul>
+      <ul class="nav flex-column mt-auto" style="margin-bottom: 20px;">
+        <li class="nav-item">
+          <a href="{{ url_for('main.dashboard') }}" class="nav-link" data-bs-toggle="modal"
+             data-bs-target="#logoutModal" style="border-bottom: 0.1em solid white;">Cerrar sesión</a>
+        </li>
+    </nav>
+
+    <!-- Contenido principal -->
+    <div class="main-content">
+      <!-- Barra de herramientas -->
+      <div class="d-flex justify-content-between mb-3">
+        <div class="input-group">
+          <input
+            type="text"
+            class="form-control buscador-general"
+            placeholder="Nombre, Nº documento..."
+          />
+          <button class="btn btn-primary" style="background-color: #194989;">
+            <i class="bi bi-search"></i> Buscar
+          </button>
+        </div>
+        <div class="btnauxiliar d-flex gap-2">
+          <button class="btn btn-secondary">Exportar</button>
+          <button class="btn btn-secondary" style="background-color: #6c757d;">
+            Agregar
+          </button>
+        </div>
+      </div>
+
+      <!-- Filtro por estado -->
+      <div class="mb-3">
+        <label for="filter-state" class="form-label">Filtrar por estado:</label>
+        <select id="filter-state" class="form-select w-auto">
+          <option value="all">Todos</option>
+          <option value="active">Activo</option>
+          <option value="inactive">Inactivo</option>
+        </select>
+      </div>
+
+      <!-- Tabla de ejemplo -->
+      <table class="table table-hover table-light">
+        <thead>
+          <tr>
+            <th>Nº Doc</th>
+            <th>Nombre</th>
+            <th>Apellidos</th>
+            <th>Correo</th>
+            <th>Cel</th>
+            <th>Estado</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in clients %}
+          <tr>
+            <td>{{ c.documento }}</td>
+            <td>{{ c.nombres }}</td>
+            <td>{{ c.apellidos }}</td>
+            <td>{{ c.correo }}</td>
+            <td>{{ c.celular }}</td>
+            <td>{{ 'Activo' if c.activo else 'Inactivo' }}</td>
+            <td>
+              <button class="btn btn-sm btn-warning">Editar</button>
+              <button class="btn btn-sm btn-danger">Eliminar</button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <!-- Paginación -->
+      <nav>
+        <ul class="pagination">
+          {% if pagination.has_prev %}
+          <li class="page-item">
+            <a class="page-link"
+               href="{{ url_for('main.dashboard', page=pagination.prev_num) }}">←</a>
+          </li>
+          {% endif %}
+          {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+            {% if p %}
+              {% if p == pagination.page %}
+              <li class="page-item active"><span class="page-link">{{ p }}</span></li>
+              {% else %}
+              <li class="page-item">
+                <a class="page-link"
+                   href="{{ url_for('main.dashboard', page=p) }}">{{ p }}</a>
+              </li>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+          {% if pagination.has_next %}
+          <li class="page-item">
+            <a class="page-link"
+               href="{{ url_for('main.dashboard', page=pagination.next_num) }}">→</a>
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+>>>>>>> 0a66df8b6f10f991df2583dbf77137d52fab6952
   </div>
 
   {% include 'includes/alerts.html' %}
@@ -53,6 +270,7 @@
     </tbody>
   </table>
 
+<<<<<<< HEAD
   {% if pagination %}
   <nav aria-label="Página de clientes">
     <ul class="pagination">
@@ -62,6 +280,27 @@
            href="{{ url_for('main.index', page=pagination.prev_num) }}">&larr;</a>
       </li>
       {% endif %}
+=======
+  <!-- Botón fijo Cerrar Sesión -->
+
+  <div class="modal fade" id="logoutModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content p-2">
+        <div class="modal-header text-dark">
+          <h5 class="modal-title">Confirmar cierre de sesión</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          ¿Está seguro que desea cerrar la sesión?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+          <a href="{{ url_for('main.logout') }}" class="btn btn-danger">Si</a>
+        </div>
+      </div>
+    </div>
+  </div>
+>>>>>>> 0a66df8b6f10f991df2583dbf77137d52fab6952
 
       {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
         {% if p %}
