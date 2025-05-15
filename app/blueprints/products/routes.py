@@ -2,6 +2,7 @@ from flask import render_template, request
 from flask_login import login_required
 from app.models.producto import Producto
 from flask import Blueprint, redirect, url_for, flash
+from app.models.categoria import Categoria  # importa el modelo Categoria
 
 products_bp = Blueprint("products", __name__, url_prefix="/productos")
 
@@ -17,8 +18,11 @@ def list_products():
     # Obtener los productos actuales en la página
     productos = pagination.items
 
+    categorias = Categoria.query.order_by(Categoria.categoria).all()
+
+  
     # Pasar productos y paginación al template
-    return render_template("products/list.html", productos=productos, pagination=pagination)
+    return render_template("products/list.html", productos=productos, pagination=pagination, categorias=categorias)
 
 
 @products_bp.route("/crear", methods=["POST"])
