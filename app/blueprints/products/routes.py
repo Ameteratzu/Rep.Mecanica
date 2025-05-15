@@ -1,8 +1,10 @@
-from flask import render_template, request
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_required
 from app.models.producto import Producto
 from flask import Blueprint, redirect, url_for, flash
 from app.models.categoria import Categoria  # importa el modelo Categoria
+from app.extensions import db
+
 
 products_bp = Blueprint("products", __name__, url_prefix="/productos")
 
@@ -49,4 +51,34 @@ def create_product():
     db.session.commit()
 
     flash("Producto agregado exitosamente", "success")
+    return redirect(url_for("products.list_products"))
+
+@products_bp.route("/<int:producto_id>/editar", methods=["GET"])
+@login_required
+def get_product(producto_id):
+    producto = Producto.query.get_or_404(producto_id)
+    # Retornar datos en JSON para llenar el modal con JS
+    return jsonify({
+        "id": producto.id,
+        "codigo": producto.codigo,
+        "nombre": producto.nombre,
+        "marca": producto.marca,
+        "precio": float(producto.precio),
+        "categoria_id": producto.categoria_id,
+        "activo": producto.activo
+    })
+
+@products_bp.route("/<int:producto_id>/editar", methods=["POST"])
+@login_required
+def edit_product(producto_id):
+    producto = Producto.query.get_or_404(producto_id)
+    producto.codigo = request.form["codigo"]
+    producto.nombre = request.form["nombre"]
+    producto.marca = request.form["marca"]
+    producto.precio = request.form["precio"]
+    producto.categoria_id = request.form["categoria_id"]
+    producto.activo = "activo" in request.form
+
+    db.session.commit()
+    flash("Producto actualizado exitosamente", "success")
     return redirect(url_for("products.list_products"))
