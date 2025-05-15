@@ -18,7 +18,29 @@
       justify-content: center;
       background-color: #f8f9fa;
     }
+
+    .login-right{
+    background: linear-gradient(135deg, #1b254b, #007bff); /* Degradado diagonal */
+    color: white;
+    }
+    .login-right a{
+    color: white !important;
+    
+
+text-decoration: underline !important;
+    }
+      
+input{
+text-shadow: 1px 1px 1px #004bff, 0px 0px 1px white; /* Sombra azul y blanco */
+  }
+
     .login-container {
+      
+    
+
+      border: 3px solid rgba(0, 0, 0, 0.3); /* Borde oscuro */
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Agrega sombra al borde */
+      background-size: 80%; /* Reduce el tamaño del background */
       width: 90vw;
       max-width: 1200px;
       height: 90vh;
@@ -30,6 +52,13 @@
     .login-left {
       flex: 1.2;
       background: url('{{ url_for("static", filename="img/login-bg.jpg") }}') center / cover no-repeat;
+      
+      
+
+border: 3px solid rgba(0, 0, 0, 0.3); /* Borde oscuro */
+box-shadow: 0 2em 2rem rgba(0, 0, 0, 0.0); /* Sombra más marcada */
+background-size: 80%; /* Reduce el tamaño del background */
+     
       display: flex;
       align-items: center;
       justify-content: center;
