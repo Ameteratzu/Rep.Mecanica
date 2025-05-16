@@ -245,29 +245,18 @@ def lista_clientes():
 @main.route('/clientes/nuevo', methods=['POST'])
 @login_required
 def nuevo_cliente():
-    if request.method == 'POST':
-        # Procesa el POST: mismos campos que en editar
-        tipo_doc  = request.form['tipoDocumento']
-        documento = request.form['documento'].strip()
-        nombres   = request.form['nombres'].strip()
-        apellidos = request.form['apellidos'].strip()
-        direccion = request.form['direccion'].strip()
-        celular   = request.form['celular'].strip()
-        ubigeo_id = int(request.form['ubigeo'])
-        activo    = int(request.form['activo'])
-
-        c = Cliente(
-        tipo_documento = request.form['tipoDocumento'],
-        documento      = request.form['documento'].strip(),
-        nombres        = request.form['nombres'].strip(),
-        apellidos      = request.form['apellidos'].strip(),
-        correo         = request.form.get('correo','').strip(),
-        celular        = request.form.get('celular','').strip(),
-        direccion      = request.form.get('direccion','').strip(),
-        ubigeo_id      = int(request.form['ubigeo']),
-        activo         = bool(int(request.form['activo']))
-    )
     try:
+        c = Cliente(
+            tipo_documento = request.form.get('tipoDocumento', '').strip(),
+            documento      = request.form.get('documento', '').strip(),
+            nombres        = request.form.get('nombres', '').strip(),
+            apellidos      = request.form.get('apellidos', '').strip(),
+            correo         = request.form.get('correo', '').strip(),
+            celular        = request.form.get('celular', '').strip(),
+            direccion      = request.form.get('direccion', '').strip(),
+            ubigeo_id      = int(request.form.get('ubigeo', 0)),
+            activo         = bool(int(request.form.get('activo', 1)))
+        )
         db.session.add(c)
         db.session.commit()
         flash('Cliente registrado correctamente', 'success')
@@ -276,6 +265,7 @@ def nuevo_cliente():
         flash(f'Error al registrar cliente: {e}', 'danger')
 
     return redirect(url_for('main.lista_clientes'))
+
 
 @main.route('/clientes/exportar', methods=['GET'])
 @login_required
