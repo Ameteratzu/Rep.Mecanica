@@ -367,3 +367,21 @@ def eliminar_cliente(cliente_id):
         db.session.rollback()
         flash(f'Error al eliminar el cliente: {e}', 'danger')
     return redirect(url_for('main.lista_clientes'))
+
+
+@main.route('/clientes/nuevo_desde_comprobante', methods=['POST'])
+@login_required
+def nuevo_cliente_desde_comprobante():
+    # Procesa el formulario y agrega cliente a la BD
+    c = Cliente(
+        nombres=request.form['nombres'],
+        apellidos=request.form['apellidos'],
+        documento=request.form['documento'],
+        # agrega los demás campos necesarios
+        activo=True
+    )
+    db.session.add(c)
+    db.session.commit()
+    flash('Cliente registrado correctamente', 'success')
+    # Redirige de vuelta a comprobantes (idealmente podrías regresar con JS y refrescar solo el select)
+    return redirect(url_for('comprobantes.list_comprobantes'))

@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, send_file, flash, redirec
 from flask_login import login_required
 from app.models.comprobante import Comprobante, ComprobanteDetalle
 from app.models.cliente import Cliente
-from datetime import datetime
+from datetime import datetime, date
 from app.extensions import db
 
 import io
@@ -25,12 +25,15 @@ def list_comprobantes():
             (Comprobante.total.ilike(f"%{search}%"))
         )
     comprobantes = query.order_by(Comprobante.id.desc()).all()
+    clientes = Cliente.query.order_by(Cliente.nombres).all()
+    hoy = date.today().strftime("%Y-%m-%d")
     return render_template(
         "comprobantes/list.html",
         comprobantes=comprobantes,
+        clientes=clientes,
+        hoy=hoy,
         search=search,
-        active="comprobantes",
-        hoy=datetime.now().strftime('%Y-%m-%d')  # <--- Esta línea es la clave
+        active="comprobantes"
     )
 
 @comprobantes_bp.route("/exportar", methods=["GET"])
@@ -96,18 +99,16 @@ def nueva_boleta():
     cliente_id = request.form.get("cliente_id")
     # Si no hay cliente_id, se creará uno nuevo usando los datos del formulario
     if not cliente_id or not cliente_id.isdigit():
-        # Crea el cliente con los datos del formulario
-        nombres = request.form.get("nombres")
-        apellidos = request.form.get("apellidos")
-        tipo_documento = request.form.get("tipo_documento")
-        documento = request.form.get("documento")
-        celular = request.form.get("celular")
-        correo = request.form.get("correo")
-        direccion = request.form.get("direccion")
+        nombres = request.form.get("nuevo_nombres")
+        apellidos = request.form.get("nuevo_apellidos")
+        tipo_documento = request.form.get("nuevo_tipo_documento")
+        documento = request.form.get("nuevo_documento")
+        celular = request.form.get("nuevo_celular")
+        correo = request.form.get("nuevo_correo")
+        direccion = request.form.get("nuevo_direccion")
         if not (nombres and apellidos and tipo_documento and documento):
             flash("Faltan datos del nuevo cliente.", "danger")
             return redirect(request.referrer or url_for('comprobantes.list_comprobantes'))
-
         nuevo_cliente = Cliente(
             nombres=nombres,
             apellidos=apellidos,
@@ -122,18 +123,49 @@ def nueva_boleta():
         db.session.commit()
         cliente_id = nuevo_cliente.id
 
-    forma_pago = request.form.get("forma_pago")
-    total = float(request.form.get("total") or 0)
-    observaciones = request.form.get("observaciones") or ""
+    # DETALLES DE PRODUCTO/SERVICIO
+    descripciones = request.form.getlist("descripcion[]")
+    cantidades = request.form.getlist("cantidad[]")
+    precios = request.form.getlist("precio_unitario[]")
+    
+    # Calcular total general correctamente
+    total = 0
+    detalles = []
+    for desc, cant, precio in zip(descripciones, cantidades, precios):
+        try:
+            cantidad = int(cant)
+            precio_unit = float(precio)
+        except (ValueError, TypeError):
+            continue
+        total_fila = cantidad * precio_unit
+        detalles.append({
+            'descripcion': desc,
+            'cantidad': cantidad,
+            'precio_unitario': precio_unit,
+            'total': total_fila
+        })
+        total += total_fila
+
     subtotal = round(total / 1.18, 2)
     igv = round(total - subtotal, 2)
+    forma_pago = request.form.get("forma_pago")
+    observaciones = request.form.get("observaciones") or ""
+    fecha_emision = request.form.get("fecha_emision")
+    if fecha_emision:
+        try:
+            fecha_emision = datetime.strptime(fecha_emision, "%Y-%m-%d")
+        except Exception:
+            fecha_emision = datetime.utcnow()
+    else:
+        fecha_emision = datetime.utcnow()
+
     ultimo = Comprobante.query.order_by(Comprobante.numero.desc()).first()
     numero = (ultimo.numero + 1) if ultimo else 1
 
     boleta = Comprobante(
         serie="B001",
         numero=numero,
-        fecha_emision=datetime.utcnow(),
+        fecha_emision=fecha_emision,
         cliente_id=int(cliente_id),
         subtotal=subtotal,
         igv=igv,
@@ -142,6 +174,18 @@ def nueva_boleta():
         observaciones=observaciones
     )
     db.session.add(boleta)
+    db.session.flush()  # Para obtener el id de boleta antes de commit
+
+    # Guardar detalles
+    for d in detalles:
+        det = ComprobanteDetalle(
+            comprobante_id=boleta.id,
+            descripcion=d['descripcion'],
+            cantidad=d['cantidad'],
+            precio_unitario=d['precio_unitario'],
+            total=d['total']
+        )
+        db.session.add(det)
     db.session.commit()
     flash("Boleta registrada correctamente", "success")
     return redirect(url_for("comprobantes.list_comprobantes"))

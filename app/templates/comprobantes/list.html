@@ -4,7 +4,7 @@
 <style>
 .main-content {
   margin-top: 60px;
-  margin-left: 200px; /* Ajusta si tu sidebar es diferente */
+  margin-left: 200px;
   padding: 2.5em 1.5em;
   background-color: white;
   min-height: calc(100vh - 60px);
@@ -22,7 +22,6 @@
       <a href="{{ url_for('comprobantes.exportar_comprobantes_excel') }}" class="btn btn-success">
         <i class="fas fa-file-csv"></i> Exportar Excel
       </a>
-      <!-- Botón para abrir el modal -->
       <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#modalNuevaBoleta">
         <i class="fas fa-plus"></i> Nueva Boleta
       </button>
@@ -72,7 +71,6 @@
             <td>{{ c.forma_pago or '-' }}</td>
             <td class="d-flex gap-1">
               <a href="{{ url_for('comprobantes.imprimir_comprobante', comprobante_id=c.id) }}" class="btn btn-info btn-sm">Ver</a>
-              <!-- Botón para mostrar detalles -->
               <button type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="collapse" data-bs-target="#detalles{{ c.id }}" aria-expanded="false" aria-controls="detalles{{ c.id }}">
                 <i class="fas fa-chevron-down"></i>
               </button>
@@ -120,87 +118,82 @@
 </div>
 
 <!-- MODAL: Nueva Boleta -->
-<div class="modal fade" id="modalNuevaBoleta" tabindex="-1" aria-labelledby="modalNuevaBoletaLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl">
-    <form class="modal-content" method="POST" action="{{ url_for('comprobantes.nueva_boleta') }}">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalNuevaBoletaLabel"><i class="fas fa-file-invoice"></i> Nueva Boleta</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <div class="row g-3">
+<div class="modal fade" id="modalNuevaBoleta" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <form method="POST" action="{{ url_for('comprobantes.nueva_boleta') }}">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Nueva Boleta</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
           <!-- Cliente existente -->
-          <div class="col-md-6">
+           <div class="mb-2">
             <label for="cliente_id" class="form-label">Cliente existente</label>
-            <select name="cliente_id" id="cliente_id" class="form-select">
+            <select id="cliente_id" name="cliente_id" class="form-select">
               <option value="">Selecciona un cliente...</option>
               {% for c in clientes %}
-                <option value="{{ c.id }}">
-                  {{ c.nombres }} {{ c.apellidos }} - {{ c.documento }}
-                </option>
+                <option value="{{ c.id }}">{{ c.nombres }} {{ c.apellidos }} ({{ c.documento }})</option>
               {% endfor %}
             </select>
-            <div class="form-text">
-              ¿No existe? <a href="#" onclick="mostrarNuevoCliente(event)">Crear nuevo cliente</a>
+            <small>
+              ¿No existe?
+              <a href="#" onclick="mostrarNuevoCliente(event)" style="color:blue;">
+                Crear nuevo cliente
+              </a>
+            </small>
+          </div>
+
+          <!-- Campos para nuevo cliente (hidden por defecto) -->
+          <div id="nuevoClienteCampos" class="row g-3 mt-2" style="display: none; border: 1px solid #e1e1e1; padding: 14px; border-radius: 7px; background: #f8fafc;">
+            <h6>Datos del nuevo cliente</h6>
+            <div class="col-md-6 mb-2">
+              <input type="text" name="nuevo_nombres" class="form-control" placeholder="Nombres">
             </div>
+            <div class="col-md-6 mb-2">
+              <input type="text" name="nuevo_apellidos" class="form-control" placeholder="Apellidos">
+            </div>
+            <div class="col-md-4 mb-2">
+              <select name="nuevo_tipo_documento" class="form-select">
+                <option value="DNI">DNI</option>
+                <option value="RUC">RUC</option>
+              </select>
+            </div>
+            <div class="col-md-4 mb-2">
+              <input type="text" name="nuevo_documento" class="form-control" placeholder="N° Documento">
+            </div>
+            <div class="col-md-4 mb-2">
+              <input type="text" name="nuevo_celular" class="form-control" placeholder="Celular">
+            </div>
+            <div class="col-md-6 mb-2">
+              <input type="email" name="nuevo_correo" class="form-control" placeholder="Correo">
+            </div>
+            <div class="col-md-6 mb-2">
+              <input type="text" name="nuevo_direccion" class="form-control" placeholder="Dirección">
+            </div>
+            <a href="#" class="small" onclick="ocultarNuevoCliente();return false;">Seleccionar cliente existente</a>
           </div>
-        </div>
-        <div id="nuevoClienteCampos" class="row g-3 mt-2" style="display: none;">
-          <!-- Datos nuevo cliente -->
-          <h6>Datos del nuevo cliente</h6>
-          <div class="col-md-6">
-            <label class="form-label">Nombres</label>
-            <input type="text" name="nombres" class="form-control">
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">Apellidos</label>
-            <input type="text" name="apellidos" class="form-control">
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">Tipo Documento</label>
-            <select name="tipo_documento" class="form-select">
-              <option value="DNI">DNI</option>
-              <option value="CE">CE</option>
-              <option value="RUC">RUC</option>
-            </select>
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">N° Documento</label>
-            <input type="text" name="documento" class="form-control">
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">Celular</label>
-            <input type="text" name="celular" class="form-control">
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">Correo</label>
-            <input type="email" name="correo" class="form-control">
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">Dirección</label>
-            <input type="text" name="direccion" class="form-control">
-          </div>
-        </div>
-        <hr class="my-3">
+          <hr>
+
         <div class="row g-3">
-          <div class="col-md-4">
+          <div class="col-md-6 mb-2">
             <label class="form-label">Fecha de emisión</label>
             <input type="date" name="fecha_emision" class="form-control" value="{{ hoy }}">
           </div>
-          <div class="col-md-4">
+          <div class="col-md-6 mb-2">
             <label class="form-label">Forma de pago</label>
             <select name="forma_pago" class="form-select">
               <option value="Efectivo">Efectivo</option>
-              <option value="Transferencia">Transferencia</option>
+              <option value="Tarjeta">Tarjeta</option>
               <option value="Yape">Yape</option>
               <option value="Plin">Plin</option>
-              <option value="Tarjeta">Tarjeta</option>
+              <option value="Transferencia">Transferencia</option>
             </select>
           </div>
-          <div class="col-md-4">
-            <label class="form-label">Observaciones</label>
-            <input type="text" name="observaciones" class="form-control">
-          </div>
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Observaciones</label>
+          <input type="text" name="observaciones" class="form-control">
         </div>
         <hr class="my-3">
         <!-- Detalles de productos o servicios -->
@@ -243,24 +236,29 @@
           <input type="number" name="total" id="totalBoletaInput" class="form-control fw-bold" style="width: 200px; display: inline-block;" step="0.01" value="0.00" readonly>
         </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-        <button type="submit" class="btn btn-success">Guardar Boleta</button>
-      </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          <button type="submit" class="btn btn-success">Guardar Boleta</button>
+        </div>
     </form>
   </div>
 </div>
 {% endblock %}
 
-<!-- SCRIPT para agregar más filas de detalle -->
+<!-- JS: Cliente nuevo -->
 <script>
 function mostrarNuevoCliente(e) {
   e.preventDefault();
   document.getElementById('nuevoClienteCampos').style.display = '';
   document.getElementById('cliente_id').value = '';
 }
+function ocultarNuevoCliente() {
+  document.getElementById('nuevoClienteCampos').style.display = 'none';
+}
+</script>
 
-// Calcula totales automáticamente
+<!-- SCRIPT para agregar más filas de detalle -->
+<script>
 function calcularTotales() {
   let total = 0;
   document.querySelectorAll("#tablaDetalleBoleta tbody tr").forEach(row => {
@@ -289,7 +287,6 @@ function eliminarFilaDetalle(btn) {
   btn.closest('tr').remove();
   calcularTotales();
 }
-// Listeners para recalcular totales en inputs
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('#tablaDetalleBoleta input').forEach(inp => {
     inp.addEventListener('input', calcularTotales);
