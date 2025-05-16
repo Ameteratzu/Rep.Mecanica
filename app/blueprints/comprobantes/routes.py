@@ -127,7 +127,10 @@ def nueva_boleta():
     descripciones = request.form.getlist("descripcion[]")
     cantidades = request.form.getlist("cantidad[]")
     precios = request.form.getlist("precio_unitario[]")
-    
+    if not descripciones or not cantidades or not precios or len(descripciones) == 0:
+        flash("Debe ingresar al menos un detalle en la boleta.", "danger")
+        return redirect(request.referrer or url_for('comprobantes.list_comprobantes'))
+
     # Calcular total general correctamente
     total = 0
     detalles = []
@@ -145,6 +148,10 @@ def nueva_boleta():
             'total': total_fila
         })
         total += total_fila
+
+    if total <= 0:
+        flash("El total de la boleta debe ser mayor a cero.", "danger")
+        return redirect(request.referrer or url_for('comprobantes.list_comprobantes'))
 
     subtotal = round(total / 1.18, 2)
     igv = round(total - subtotal, 2)
