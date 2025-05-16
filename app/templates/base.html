@@ -156,10 +156,13 @@
       <a href="{{ url_for('products.list_products') }}"
          class="nav-link {% if request.endpoint.startswith('products.') %}active{% endif %}">Productos</a>
     </li>
-    <li class="nav-item">
-      <a class="nav-link disabled" tabindex="-1" aria-disabled="true" style="color:#b1b7be;pointer-events:none;">Clientes</a>
-      <!-- Si algún día quieres que funcione, quítale “disabled” y “pointer-events:none” -->
-    </li>
+      <li class="nav-item">
+        <a href="{{ url_for('main.lista_clientes') }}"
+           class="nav-link {% if request.endpoint == 'main.lista_clientes' %}active{% endif %}">
+          Clientes
+        </a>
+
+      </li>
   </ul>
   <!-- Botón fijo abajo a la izquierda -->
   <div class="sidebar-logout-container">

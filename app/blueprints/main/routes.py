@@ -229,16 +229,42 @@ def dashboard():
 @main.route('/clientes', methods=['GET'])
 @login_required
 def lista_clientes():
-    page      = request.args.get('page', 1, type=int)
-    pagination= Cliente.query.order_by(Cliente.id.desc()).paginate(page=page, per_page=10, error_out=False)
-    clientes  = pagination.items
-    ubigeos   = Ubigeo.query.order_by(Ubigeo.departamento, Ubigeo.provincia, Ubigeo.distrito).all()
+    estado = request.args.get('estado', 'Todos')
+    search = request.args.get('search', '').strip()
+    page = request.args.get('page', 1, type=int)
+
+    query = Cliente.query
+
+    # Filtro por estado
+    if estado == 'Activo':
+        query = query.filter(Cliente.activo == True)
+    elif estado == 'Inactivo':
+        query = query.filter(Cliente.activo == False)
+
+    # Filtro por búsqueda
+    if search:
+        search_filter = f"%{search}%"
+        query = query.filter(
+            (Cliente.nombres.ilike(search_filter)) |
+            (Cliente.apellidos.ilike(search_filter)) |
+            (Cliente.documento.ilike(search_filter)) |
+            (Cliente.celular.ilike(search_filter)) |
+            (Cliente.correo.ilike(search_filter))
+        )
+
+    pagination = query.order_by(Cliente.id.desc()).paginate(page=page, per_page=10, error_out=False)
+    clientes = pagination.items
+    ubigeos = Ubigeo.query.order_by(Ubigeo.departamento, Ubigeo.provincia, Ubigeo.distrito).all()
+
     return render_template(
         'cliente/list.html',
         clientes=clientes,
         pagination=pagination,
+        estado=estado,
+        search=search,
         ubigeos=ubigeos
     )
+
 
 
 
