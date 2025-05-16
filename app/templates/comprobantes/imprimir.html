@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Boleta {{ comprobante.serie }}-{{ "%08d"|format(comprobante.numero) }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      background: #fff;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .ticket {
+      background: white;
+      width: 350px;
+      margin: 18px auto;
+      border-radius: 10px;
+      box-shadow: 0 2px 18px rgba(0,0,0,0.10);
+      padding: 1em 0.9em 1.1em 0.9em;
+      border: 1.5px solid #eee;
+    }
+    .logo {
+      text-align: center;
+      margin-bottom: 0.5em;
+    }
+    .logo img {
+      max-width: 180px;
+      max-height: 80px;
+    }
+    .empresa, .cliente {
+      text-align: center;
+      font-size: 0.93em;
+      line-height: 1.38;
+    }
+    .empresa strong { font-size: 1.07em; }
+    .nro-boleta {
+      text-align: center;
+      margin: 0.7em 0 0.5em 0;
+      font-weight: bold;
+      font-size: 1.14em;
+      letter-spacing: 2px;
+    }
+    .titulo {
+      text-align: center;
+      font-size: 1.12em;
+      margin-bottom: 0.25em;
+      font-weight: bold;
+    }
+    .data, .cliente, .empresa { margin-bottom: 0.7em;}
+    .data {
+      font-size: 0.93em;
+      text-align: left;
+      margin-top: 0.7em;
+      margin-bottom: 0.25em;
+    }
+    .data strong {
+      width: 60px;
+      display: inline-block;
+      font-weight: bold;
+    }
+    .tabla-detalle {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 0.6em;
+      font-size: 0.97em;
+    }
+    .tabla-detalle th, .tabla-detalle td {
+      border-bottom: 1px solid #e4e4e4;
+      padding: 0.26em 0.15em;
+      text-align: right;
+    }
+    .tabla-detalle th { text-align: center; background: #f6f9fb; font-size: 0.93em;}
+    .tabla-detalle td.desc {text-align:left;}
+    .tabla-detalle td.cant {text-align:center;}
+    .tabla-detalle td.um {text-align:center;}
+    .tabla-detalle td.cod {text-align:center;}
+    .totales {
+      font-size: 1.02em;
+      margin-top: 0.5em;
+      margin-bottom: 0.5em;
+      text-align: right;
+    }
+    .totales .total {
+      font-size: 1.17em;
+      font-weight: bold;
+      color: #008241;
+      margin-top: 0.3em;
+    }
+    .resaltado { font-weight: bold; }
+    .son {
+      margin-top: 0.7em;
+      font-size: 0.92em;
+      text-align: left;
+      border-bottom: 1px solid #e7e7e7;
+      padding-bottom: 0.32em;
+    }
+    .observaciones {
+      font-size: 0.91em;
+      margin: 0.45em 0 0.1em 0;
+    }
+    .qr {
+      text-align: center;
+      margin-top: 0.5em;
+      margin-bottom: 0.6em;
+    }
+    .qr img { width: 100px; height: 100px;}
+    .footer {
+      font-size: 0.88em;
+      text-align: center;
+      margin-top: 0.5em;
+      color: #555;
+    }
+    .imprimir-btn {
+      display: block;
+      width: 90%;
+      margin: 0.6em auto 0.1em auto;
+      background: #1456b1;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      padding: 0.45em;
+      font-size: 1em;
+      cursor: pointer;
+    }
+    @media print {
+      .imprimir-btn, .no-print { display: none !important; }
+      body, html { background: white !important; }
+      .ticket { box-shadow: none; margin: 0;}
+    }
+  </style>
+</head>
+<body>
+  <div class="ticket">
+    <div class="logo">
+      <img src="{{ url_for('static', filename='img/login-bg.jpg') }}" alt="Logo empresa">
+    </div>
+    <div class="empresa">
+      <strong>EMPRESA TECMECH S.A.C.</strong><br>
+      RUC: 20100100100<br>
+      Calle Las Normas 123<br>
+      Telf: 987 654 321<br>
+      Correo: contacto@miempresa.com<br>
+      Web: www.miempresa.com
+    </div>
+    <div class="nro-boleta">
+      BOLETA DE VENTA ELECTRÓNICA<br>
+      <span style="font-size:1.13em;">{{ comprobante.serie }} - {{ "%08d"|format(comprobante.numero) }}</span>
+    </div>
+    <div class="cliente">
+      <div style="font-size:1.08em; font-weight:bold;">
+        {{ comprobante.cliente.nombres }} {{ comprobante.cliente.apellidos }}
+      </div>
+      DNI {{ comprobante.cliente.documento }}
+    </div>
+    <div class="data">
+      <strong>FECHA:</strong>
+      {{ comprobante.fecha_emision.strftime('%d/%m/%Y') if comprobante.fecha_emision else '-' }}<br>
+      <strong>HORA:</strong>
+      {{ comprobante.fecha_emision.strftime('%H:%M') if comprobante.fecha_emision else '-' }}
+    </div>
+    <table class="tabla-detalle">
+    <thead>
+        <tr>
+        <th class="cant">Cant</th>
+        <th class="desc">Descripción</th>
+        <th class="um">U.M</th>
+        <th class="cod">COD</th>
+        <th>Precio</th>
+        <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in comprobante.detalle %}
+        <tr>
+        <td class="cant">{{ item.cantidad }}</td>
+        <td class="desc">{{ item.descripcion }}</td>
+        <td class="um">UND</td>
+        <td class="cod">{% if item.codigo is defined and item.codigo %}{{ item.codigo }}{% else %}---{% endif %}</td>
+        <td>S/ {{ '%.2f' % item.precio_unitario }}</td>
+        <td>S/ {{ '%.2f' % item.total }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    </table>
+
+    <div class="totales">
+      <div>Total Gravado (S/): <span class="resaltado">{{ '%.2f' % comprobante.subtotal }}</span></div>
+      <div>I.G.V (S/): <span class="resaltado">{{ '%.2f' % comprobante.igv }}</span></div>
+      <div class="total">TOTAL (S/): {{ '%.2f' % comprobante.total }}</div>
+    </div>
+    <div class="son">
+      <strong>SON:</strong> {{ comprobante.total|int }} CON {{ '%.2f' % ((comprobante.total - comprobante.total|int) * 100) }}/100 SOLES
+    </div>
+    <div class="data">
+      <strong>FORMA DE PAGO:</strong> {{ comprobante.forma_pago or '-' }}<br>
+      <strong>COND. VENTA:</strong> CONTADO
+    </div>
+    <div class="observaciones">
+      <strong>Observaciones:</strong><br>
+      {{ comprobante.observaciones or '' }}
+    </div>
+    <div class="qr">
+        <img src="{{ url_for('comprobantes.qr_comprobante', comprobante_id=comprobante.id) }}" alt="QR">
+    </div>
+    <div class="footer">
+      Representación impresa de la BOLETA DE VENTA ELECTRÓNICA<br>
+      Puede consultar en: www.miempresa.com/consulta<br>
+      Autorizado mediante Resolución 034-005-0007241
+    </div>
+    <button class="imprimir-btn no-print" onclick="window.print()">Imprimir / Descargar PDF</button>
+  </div>
+</body>
+</html>

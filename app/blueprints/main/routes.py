@@ -14,12 +14,19 @@ from app.models.ubigeo import Ubigeo
 from app.models.orden import Orden
 from app.models.comprobante import Comprobante
 from app.models import db, Persona, User  
+from app.models.rol import Rol
+from app.models.servicio import Servicio
+from app.models.producto import Producto
 import io, csv
 from app.decorators import roles_requeridos
 from flask import send_file
 from . import main
 from config import Config
 import app.extensions as ext
+import qrcode
+import io
+from flask import send_file
+
 
 admin_panel_bp = Blueprint('admin_panel', __name__)
 

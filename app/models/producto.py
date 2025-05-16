@@ -13,7 +13,7 @@ class Producto(db.Model):
     activo      = db.Column(db.Boolean, default=True)
     imagen      = db.Column(db.String(255))  # Si quieres guardar la ruta de la imagen
     categoria   = db.relationship('Categoria', backref='productos')
-
+    codigo      = db.Column(db.String(20))
     # Relación con el modelo Categoria
     categoria    = db.relationship("Categoria", back_populates="productos")
 
