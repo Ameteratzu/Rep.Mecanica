@@ -2,6 +2,8 @@ from flask import Blueprint, render_template, request, send_file, flash, redirec
 from flask_login import login_required
 from app.models.comprobante import Comprobante, ComprobanteDetalle
 from app.models.cliente import Cliente
+from app.models.producto import Producto
+from app.models.servicio import Servicio
 from datetime import datetime, date
 from app.extensions import db
 
@@ -26,11 +28,15 @@ def list_comprobantes():
         )
     comprobantes = query.order_by(Comprobante.id.desc()).all()
     clientes = Cliente.query.order_by(Cliente.nombres).all()
+    productos = Producto.query.filter_by(activo=1).all()
+    servicios = Servicio.query.filter_by(activo=1).all()
     hoy = date.today().strftime("%Y-%m-%d")
     return render_template(
         "comprobantes/list.html",
         comprobantes=comprobantes,
         clientes=clientes,
+        productos=productos,
+        servicios=servicios,
         hoy=hoy,
         search=search,
         active="comprobantes"
@@ -45,10 +51,15 @@ def exportar_comprobantes_excel():
     writer = csv.writer(si)
     writer.writerow([
         'ID', 'Serie', 'Número', 'Fecha Emisión', 'Cliente',
-        'Orden', 'Subtotal', 'IGV', 'Total', 'Forma de pago'
+        'Orden', 'Subtotal', 'IGV', 'Total', 'Forma de pago', 'Detalle'
     ])
     for c in comprobantes:
         cliente = f"{c.cliente.nombres} {c.cliente.apellidos}" if c.cliente else "-"
+        # Exporta detalles (concatena todos en una sola celda)
+        detalles = "; ".join([
+            f"{d.descripcion} (x{d.cantidad} @ {d.precio_unitario})"
+            for d in c.detalle
+        ])
         writer.writerow([
             c.id,
             c.serie,
@@ -59,7 +70,8 @@ def exportar_comprobantes_excel():
             "%.2f" % c.subtotal if hasattr(c, 'subtotal') else '',
             "%.2f" % c.igv if hasattr(c, 'igv') else '',
             "%.2f" % c.total if hasattr(c, 'total') else '',
-            c.forma_pago or ''
+            c.forma_pago or '',
+            detalles
         ])
 
     mem = io.BytesIO()
@@ -127,31 +139,31 @@ def nueva_boleta():
     descripciones = request.form.getlist("descripcion[]")
     cantidades = request.form.getlist("cantidad[]")
     precios = request.form.getlist("precio_unitario[]")
-    if not descripciones or not cantidades or not precios or len(descripciones) == 0:
-        flash("Debe ingresar al menos un detalle en la boleta.", "danger")
-        return redirect(request.referrer or url_for('comprobantes.list_comprobantes'))
+    productos_id = request.form.getlist("producto_id[]")  # Si envías el id del producto/servicio
+    servicios_id = request.form.getlist("servicio_id[]")  # Si usas id de servicio
 
     # Calcular total general correctamente
     total = 0
     detalles = []
-    for desc, cant, precio in zip(descripciones, cantidades, precios):
+    for i, (desc, cant, precio) in enumerate(zip(descripciones, cantidades, precios)):
         try:
             cantidad = int(cant)
             precio_unit = float(precio)
         except (ValueError, TypeError):
             continue
         total_fila = cantidad * precio_unit
+        # Identifica si es producto o servicio
+        prod_id = productos_id[i] if i < len(productos_id) else None
+        serv_id = servicios_id[i] if i < len(servicios_id) else None
         detalles.append({
             'descripcion': desc,
             'cantidad': cantidad,
             'precio_unitario': precio_unit,
-            'total': total_fila
+            'total': total_fila,
+            'producto_id': int(prod_id) if prod_id and prod_id.isdigit() else None,
+            'servicio_id': int(serv_id) if serv_id and serv_id.isdigit() else None,
         })
         total += total_fila
-
-    if total <= 0:
-        flash("El total de la boleta debe ser mayor a cero.", "danger")
-        return redirect(request.referrer or url_for('comprobantes.list_comprobantes'))
 
     subtotal = round(total / 1.18, 2)
     igv = round(total - subtotal, 2)
@@ -183,14 +195,16 @@ def nueva_boleta():
     db.session.add(boleta)
     db.session.flush()  # Para obtener el id de boleta antes de commit
 
-    # Guardar detalles
+    # Guardar detalles: asocia producto_id o servicio_id si aplica
     for d in detalles:
         det = ComprobanteDetalle(
             comprobante_id=boleta.id,
+            producto_id=d.get('producto_id'),
             descripcion=d['descripcion'],
             cantidad=d['cantidad'],
             precio_unitario=d['precio_unitario'],
             total=d['total']
+            # Si tienes servicio_id, agrégalo aquí en tu modelo ComprobanteDetalle
         )
         db.session.add(det)
     db.session.commit()

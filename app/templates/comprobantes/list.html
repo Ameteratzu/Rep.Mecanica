@@ -205,10 +205,12 @@
               </button>
             </h2>
             <div id="collapseDetalles" class="accordion-collapse collapse" aria-labelledby="headingDetalles" data-bs-parent="#detallesVentaAccordion">
-              <div class="accordion-body">
-                <table class="table table-bordered align-middle" id="tablaDetalleBoleta">
+              <div id="detalles-venta">
+                <table class="table table-bordered" id="tabla-detalle">
                   <thead>
                     <tr>
+                      <th>Tipo</th>
+                      <th>Producto/Servicio</th>
                       <th>Descripción</th>
                       <th>Cantidad</th>
                       <th>Precio unitario</th>
@@ -226,7 +228,11 @@
                     </tr>
                   </tbody>
                 </table>
-                <button type="button" class="btn btn-secondary" onclick="agregarFilaDetalle()"><i class="fas fa-plus"></i> Agregar fila</button>
+                <button type="button" class="btn btn-sm btn-secondary" id="agregar-fila">Agregar fila</button>
+                <div class="text-end mt-2">
+                  <strong>Total (S/): <span id="total-general">0.00</span></strong>
+                  <input type="hidden" name="total" id="total-input">
+                </div>
               </div>
             </div>
           </div>
@@ -292,5 +298,94 @@ document.addEventListener('DOMContentLoaded', () => {
     inp.addEventListener('input', calcularTotales);
   });
   calcularTotales();
+});
+</script>
+<script>
+/* 'productos' y 'servicios' ya deben estar definidos anteriormente, así que no los redeclaramos aquí */
+
+function crearFilaDetalle() {
+  // <option> de productos
+  let prodOptions = productos.map(p =>
+    `<option value="p_${p.id}" data-desc="${p.nombre}" data-precio="${p.precio}" data-tipo="producto">${p.nombre} (P)</option>`
+  ).join('');
+  // <option> de servicios
+  let servOptions = servicios.map(s =>
+    `<option value="s_${s.id}" data-desc="${s.nombre}" data-precio="${s.precio}" data-tipo="servicio">${s.nombre} (S)</option>`
+  ).join('');
+
+  return `<tr>
+    <td>
+      <select class="form-select tipo-select">
+        <option value="">--</option>
+        <option value="producto">Producto</option>
+        <option value="servicio">Servicio</option>
+      </select>
+    </td>
+    <td>
+      <select class="form-select item-select">
+        <option value="">Seleccione...</option>
+        ${prodOptions}
+        ${servOptions}
+      </select>
+      <input type="hidden" name="producto_id[]" class="producto-id">
+      <input type="hidden" name="servicio_id[]" class="servicio-id">
+    </td>
+    <td><input type="text" name="descripcion[]" class="form-control descripcion-input"></td>
+    <td><input type="number" min="1" name="cantidad[]" class="form-control cantidad-input" value="1"></td>
+    <td><input type="number" min="0" step="0.01" name="precio_unitario[]" class="form-control precio-unitario-input" value="0.00"></td>
+    <td class="total-fila">0.00</td>
+    <td><button type="button" class="btn btn-danger btn-sm eliminar-fila">-</button></td>
+  </tr>`;
+}
+
+function recalcularTotales() {
+  let totalGeneral = 0;
+  document.querySelectorAll('#tabla-detalle tbody tr').forEach(tr => {
+    const cantidad = parseFloat(tr.querySelector('.cantidad-input').value) || 0;
+    const precio = parseFloat(tr.querySelector('.precio-unitario-input').value) || 0;
+    const totalFila = cantidad * precio;
+    tr.querySelector('.total-fila').textContent = totalFila.toFixed(2);
+    totalGeneral += totalFila;
+  });
+  document.getElementById('total-general').textContent = totalGeneral.toFixed(2);
+  document.getElementById('total-input').value = totalGeneral.toFixed(2);
+}
+
+document.getElementById('agregar-fila').addEventListener('click', function() {
+  const tbody = document.querySelector('#tabla-detalle tbody');
+  tbody.insertAdjacentHTML('beforeend', crearFilaDetalle());
+  agregarEventosFila(tbody.lastElementChild);
+});
+
+function agregarEventosFila(tr) {
+  // Eliminar fila
+  tr.querySelector('.eliminar-fila').onclick = function() {
+    tr.remove();
+    recalcularTotales();
+  };
+
+  // Cuando seleccionas un producto o servicio
+  tr.querySelector('.item-select').onchange = function() {
+    const option = this.selectedOptions[0];
+    const tipo = option.dataset.tipo;
+    const desc = option.dataset.desc;
+    const precio = option.dataset.precio;
+    // Llena descripción y precio automáticamente
+    tr.querySelector('.descripcion-input').value = desc || '';
+    tr.querySelector('.precio-unitario-input').value = precio || 0;
+    // Actualiza el campo hidden del producto o servicio id
+    tr.querySelector('.producto-id').value = tipo === 'producto' ? this.value.replace('p_', '') : '';
+    tr.querySelector('.servicio-id').value = tipo === 'servicio' ? this.value.replace('s_', '') : '';
+    recalcularTotales();
+  };
+
+  // Cuando cambia cantidad o precio
+  tr.querySelector('.cantidad-input').oninput =
+    tr.querySelector('.precio-unitario-input').oninput = recalcularTotales;
+}
+
+// Inicial: una fila por defecto
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('agregar-fila').click();
 });
 </script>
