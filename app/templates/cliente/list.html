@@ -195,15 +195,16 @@
             <div class="modal-body">
               <!-- Aquí van los campos: tipo_documento, documento, nombres, apellidos, correo, direccion, ubigeo_id, celular, activo -->
               <div class="row g-3">
-                <div class="col-md-4">
-                  <label class="form-label">Tipo Documento</label>
-                  <select name="tipoDocumento" class="form-select" required>
+                <div class="col-md-6">
+                  <label class="form-label">Distrito (Ubigeo)</label>
+                  <select name="ubigeo" class="form-select" required>
                     <option value="">Seleccione...</option>
-                    <option value="DNI">DNI</option>
-                    <option value="Carnet de Extranjería">Carnet de Extranjería</option>
-                    <option value="Pasaporte">Pasaporte</option>
+                    {% for u in ubigeos %}
+                      <option value="{{ u.id }}">{{ u.departamento }}/{{ u.provincia }}/{{ u.distrito }}</option>
+                    {% endfor %}
                   </select>
                 </div>
+                <input type="hidden" name="activo" value="1">
                 <div class="col-md-4">
                   <label class="form-label">Nº Documento</label>
                   <input type="text" name="documento" class="form-control" required>
