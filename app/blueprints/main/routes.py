@@ -21,31 +21,77 @@ from . import main
 from config import Config
 import app.extensions as ext
 
-admin = Blueprint('admin', __name__)
+admin_panel_bp = Blueprint('admin_panel', __name__)
 
-
-@admin.route('/admin/panel')
+@admin_panel_bp.route('/admin/panel')
 @login_required
 @roles_requeridos('administrador')
 def admin_panel():
-    return render_template('admin/panel.html')
+    total_usuarios = User.query.count()
+    total_roles = Rol.query.count()
+    total_productos = Producto.query.count()
+    total_servicios = Servicio.query.count()
+    ultimos_usuarios = User.query.order_by(User.id.desc()).limit(5).all()
+    ultimos_productos = Producto.query.order_by(Producto.id.desc()).limit(5).all()
+
+    # Mensaje de bienvenida en el panel
+    flash("¡Has ingresado al Panel de Administración!", "info")
+
+    return render_template(
+        'admin/panel.html',
+        total_usuarios=total_usuarios,
+        total_roles=total_roles,
+        total_productos=total_productos,
+        total_servicios=total_servicios,
+        ultimos_usuarios=ultimos_usuarios,
+        ultimos_productos=ultimos_productos
+    )
+
 
 
 @main.route("/login", methods=["GET", "POST"])
 def login():
     if current_user.is_authenticated:
+        # Redirección clara si ya está logueado
+        flash("Ya has iniciado sesión.", "info")
+        # Si es admin, manda directo al panel admin
+        if current_user.persona.rol.rol == "administrador":
+            return redirect(url_for("admin_panel.admin_panel"))
         return redirect(url_for("main.dashboard"))
 
     if request.method == "POST":
         email    = request.form["email"].strip().lower()
         password = request.form["password"]
         user = User.query.filter_by(email=email, active=True).first()
-        if user and user.check_password(password):
-            login_user(user)
-            return redirect(url_for("main.dashboard"))
-        flash("Usuario o contraseña incorrectos", "danger")
+
+        # Mensaje si usuario no existe o está inactivo
+        if not user:
+            flash("Usuario no existe o está inactivo.", "danger")
+            return render_template("login.html")
+
+        # Mensaje si la persona está inactiva
+        if not user.persona.activo:
+            flash("Usuario deshabilitado, contacta al administrador.", "danger")
+            return render_template("login.html")
+
+        # Mensaje si la contraseña no coincide
+        if not user.check_password(password):
+            flash("Contraseña incorrecta.", "danger")
+            return render_template("login.html")
+
+        login_user(user)
+
+        # Si es administrador, directo al panel admin
+        if user.persona.rol.rol == "administrador":
+            flash("Bienvenido, Administrador.", "success")
+            return redirect(url_for("admin_panel.admin_panel"))
+
+        # Si es otro rol, redirige a dashboard general
+        flash("Inicio de sesión exitoso.", "success")
+        return redirect(url_for("main.dashboard"))
 
     return render_template("login.html")
+
 
 
 @main.route('/register', methods=['GET', 'POST'])

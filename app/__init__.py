@@ -33,11 +33,7 @@ def create_app():
     # Main
     from app.blueprints.main.routes import main as main_bp
     app.register_blueprint(main_bp)
-
-    # Registrar blueprint
-    from app.blueprints.admin.usuarios import usuarios_bp
-    app.register_blueprint(usuarios_bp)
-
+    
     #Registrar ambos blueprints
     from app.blueprints.admin.roles import roles_bp
     from app.blueprints.admin.usuarios import usuarios_bp
@@ -50,7 +46,6 @@ def create_app():
     app.register_blueprint(inventario_bp)
     app.register_blueprint(servicios_bp)
 
-
     # Productos
     from app.blueprints.products import products  # importa el blueprint real
     app.register_blueprint(products)            
@@ -58,12 +53,9 @@ def create_app():
     from app.blueprints.cliente.routes import cliente_bp
     app.register_blueprint(cliente_bp)  # ya trae url_prefix="/clientes"
 
-    from app.blueprints.main.routes import admin as admin_bp
-    app.register_blueprint(admin_bp)
 
-    #registra blueprint de roles
-    from app.blueprints.admin.roles import roles_bp
-    app.register_blueprint(roles_bp)
+    from app.blueprints.admin.routes import admin_panel_bp
+    app.register_blueprint(admin_panel_bp)
 
     # Órdenes
     from app.blueprints.orders.routes import orders_bp
@@ -76,6 +68,11 @@ def create_app():
     # Recibos
     from app.blueprints.receipts.routes import receipts_bp
     app.register_blueprint(receipts_bp)
+
+    from app.helpers import is_admin, is_asistente, is_mecanico
+    app.jinja_env.globals['is_admin'] = is_admin
+    app.jinja_env.globals['is_asistente'] = is_asistente
+    app.jinja_env.globals['is_mecanico'] = is_mecanico
 
     # Crea tablas pendientes
     with app.app_context():

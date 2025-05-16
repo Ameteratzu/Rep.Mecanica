@@ -200,6 +200,7 @@ background-size: 80%; /* Reduce el tamaño del background */
             </div>
           </div>
           <button type="submit" class="btn btn-primary w-100">Iniciar Sesión  →</button>
+          <button type="submit" class="btn btn-primary w-100">Iniciar Sesión  →</button>
         </form>
 
         <div class="extra-links">
@@ -210,6 +211,12 @@ background-size: 80%; /* Reduce el tamaño del background */
           ¿No tienes cuenta?
           <a href="{{ url_for('main.register') }}">Regístrate aquí</a>
         </div>
+          {% if current_user.is_authenticated and is_admin() %}
+            <a href="{{ url_for('admin_panel.admin_panel') }}" class="btn btn-warning w-100 my-3">
+              Ir directamente al Panel de Administración
+            </a>
+          {% endif %}
+          </div>
       </div>
     </div>
   </div>
