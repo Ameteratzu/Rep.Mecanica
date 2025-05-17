@@ -9,3 +9,4 @@ qrcode
 pillow
 gunicorn
 flask-cors
+pandas
