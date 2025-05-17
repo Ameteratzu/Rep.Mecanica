@@ -1,5 +1,3 @@
-# app/__init__.py
-
 from flask import Flask
 from flask_login import LoginManager
 from itsdangerous import URLSafeTimedSerializer
