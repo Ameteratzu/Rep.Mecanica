@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for
 from flask_login import login_required
 from app.models.cliente import Cliente
 from app.extensions import db
+from app.models.ubigeo import Ubigeo
 
 # Blueprint de cliente
 cliente_bp = Blueprint(
@@ -30,10 +31,12 @@ def list_cliente():
     # Paginación básica
     pagination = query.order_by(Cliente.id.desc()).paginate(page=page, per_page=10, error_out=False)
     clientes = pagination.items  # Obtén los clientes para la página actual
-
+    ubigeos = Ubigeo.query.all()
+    
     return render_template(
         "cliente/list.html",
         clientes=clientes,
+        ubigeos=ubigeos,
         pagination=pagination,
         estado=estado,
         search=search,
@@ -41,29 +44,58 @@ def list_cliente():
     )
 
 # Ruta para crear un nuevo cliente
-@cliente_bp.route("/nuevo", methods=["GET", "POST"])
+@cliente_bp.route("/nuevo", methods=["POST"])
 @login_required
 def nuevo_cliente():
     if request.method == "POST":
         # Obtener los datos del formulario
-        nombres = request.form["nombres"]
+        tipo_documento = request.form.get("tipo_documento")  # usar paréntesis
+        documento = request.form.get("documento")            # usar request.form.get
+        nombres = request.form["nombres"]                     # está bien usar corchetes si seguro existe
         apellidos = request.form["apellidos"]
-        documento = request.form["documento"]
+        correo = request.form["correo"]
+            # con get y valor por defecto para evitar error
+        direccion = request.form["direccion"]
         celular = request.form["celular"]
-        activo = bool(request.form["activo"])  # Convertir a booleano
-        ubigeo_id = request.form["ubigeo"]  # Obtener el id del ubigeo
+        activo = request.form.get("activo") == "1"            # get con paréntesis
+        
+        # Validar ubigeo_id        
+       # Obtener y validar ubigeo_id correctamente
+        ubigeo_id_raw = request.form.get("ubigeo_id", None)
+
+        if not ubigeo_id_raw or not ubigeo_id_raw.isdigit() or int(ubigeo_id_raw) == 0:
+            return "Ubigeo inválido o no seleccionado", 400
+
+        ubigeo_id = int(ubigeo_id_raw)
+
+        # Verificar que el ubigeo_id existe en la base de datos
+        ubigeo = Ubigeo.query.get(ubigeo_id)
+        if not ubigeo:
+            return "Ubigeo no encontrado", 400
+
+
+        # Validar campos obligatorios
+        if not all([tipo_documento, documento, nombres, apellidos, ubigeo_id]):
+            return "Faltan campos obligatorios", 400
 
         # Crear una nueva instancia de Cliente y agregarla a la base de datos
-        cliente = Cliente(nombres=nombres, apellidos=apellidos, documento=documento, celular=celular, activo=activo, ubigeo_id=ubigeo_id)
+        cliente = Cliente(
+            tipo_documento=tipo_documento,
+            documento=documento,
+            nombres=nombres,
+            apellidos=apellidos,
+            correo=correo,
+            ubigeo_id=int(ubigeo_id),
+            direccion=direccion,
+            celular=celular,
+            activo=activo
+        )
         db.session.add(cliente)
         db.session.commit()
 
         # Redirigir al listado de clientes
         return redirect(url_for('cliente.list_cliente'))  # Redirige al listado de clientes
 
-    # Si es GET, obtenemos todos los ubigeos
-    ubigeos = Ubigeo.query.all()  # Obtén todos los ubigeos disponibles en la base de datos
-    return render_template("cliente/from.html", ubigeos=ubigeos)  # Pasamos los ubigeos a la plantilla
 # Ruta para editar un cliente
 @cliente_bp.route("/editar/<int:cliente_id>", methods=["GET", "POST"])
 @login_required
@@ -76,7 +108,7 @@ def editar_cliente(cliente_id):
         cliente.apellidos = request.form["apellidos"]
         cliente.documento = request.form["documento"]
         cliente.celular = request.form["celular"]
-        cliente.activo = bool(request.form["activo"])  # Convertir a booleano
+        cliente.activo = request.form.get("activo") == "1"  # Esto no funciona bien si recibes "0" o "1"
 
         db.session.commit()  # Guardar cambios en la base de datos
 
@@ -127,3 +159,4 @@ def export_excel():
         download_name='clientes.xlsx',
         as_attachment=True
     )
+    
