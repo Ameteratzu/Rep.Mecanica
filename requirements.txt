@@ -10,3 +10,5 @@ pillow
 gunicorn
 flask-cors
 pandas
+XlsxWriter
+

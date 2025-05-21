@@ -56,8 +56,8 @@ def create_app():
     app.register_blueprint(admin_panel_bp)
 
     # Órdenes
-    from app.blueprints.orders.routes import orders_bp
-    app.register_blueprint(orders_bp, url_prefix="/ordenes")
+    from app.blueprints.orden.route import orden_bpp
+    app.register_blueprint(orden_bpp)
 
     # Comprobantes
     from app.blueprints.comprobantes.routes import comprobantes_bp

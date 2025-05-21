@@ -19,7 +19,7 @@ class Orden(db.Model):
     cliente         = db.relationship('Cliente', back_populates='ordenes', lazy=True)
     usuario         = db.relationship('User', back_populates='ordenes', lazy=True)
     automovil       = db.relationship('Automovil', back_populates='ordenes', lazy=True)
-    estado_orden = db.relationship('EstadoOrden', back_populates='ordenes', lazy=True)
+    estado_orden    = db.relationship('EstadoOrden', back_populates='ordenes', lazy=True)
 
     servicios       = db.relationship("OrdenServicio", backref="orden", cascade="all, delete-orphan")
     productos       = db.relationship("OrdenProducto", backref="orden", cascade="all, delete-orphan")
@@ -36,7 +36,7 @@ class Orden(db.Model):
 
 
 class OrdenServicio(db.Model):
-    __tablename__ = "ordenes_servicios"
+    _tablename_ = "ordenes_servicios"
 
     id          = db.Column(db.Integer, primary_key=True)
     orden_id    = db.Column(db.Integer, db.ForeignKey("ordenes.id"), nullable=False)
@@ -47,7 +47,7 @@ class OrdenServicio(db.Model):
 
 
 class OrdenProducto(db.Model):
-    __tablename__ = "ordenes_productos"
+    _tablename_ = "ordenes_productos"
 
     id          = db.Column(db.Integer, primary_key=True)
     orden_id    = db.Column(db.Integer, db.ForeignKey("ordenes.id"), nullable=False)
@@ -55,3 +55,4 @@ class OrdenProducto(db.Model):
     cantidad    = db.Column(db.Integer, nullable=False)
 
     producto    = db.relationship("Producto")
+    

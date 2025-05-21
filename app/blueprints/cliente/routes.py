@@ -41,7 +41,7 @@ def list_cliente():
     )
 
 # Ruta para crear un nuevo cliente
-@cliente_bp.route("/nuevo", methods=["POST"])
+@cliente_bp.route("/nuevo", methods=["GET", "POST"])
 @login_required
 def nuevo_cliente():
     if request.method == "POST":
@@ -51,15 +51,19 @@ def nuevo_cliente():
         documento = request.form["documento"]
         celular = request.form["celular"]
         activo = bool(request.form["activo"])  # Convertir a booleano
+        ubigeo_id = request.form["ubigeo"]  # Obtener el id del ubigeo
 
         # Crear una nueva instancia de Cliente y agregarla a la base de datos
-        cliente = Cliente(nombres=nombres, apellidos=apellidos, documento=documento, celular=celular, activo=activo)
+        cliente = Cliente(nombres=nombres, apellidos=apellidos, documento=documento, celular=celular, activo=activo, ubigeo_id=ubigeo_id)
         db.session.add(cliente)
         db.session.commit()
 
         # Redirigir al listado de clientes
         return redirect(url_for('cliente.list_cliente'))  # Redirige al listado de clientes
 
+    # Si es GET, obtenemos todos los ubigeos
+    ubigeos = Ubigeo.query.all()  # Obtén todos los ubigeos disponibles en la base de datos
+    return render_template("cliente/from.html", ubigeos=ubigeos)  # Pasamos los ubigeos a la plantilla
 # Ruta para editar un cliente
 @cliente_bp.route("/editar/<int:cliente_id>", methods=["GET", "POST"])
 @login_required
@@ -97,9 +101,29 @@ def export_excel():
     import io
     from flask import send_file
 
+    # Obtener los clientes
     clientes = Cliente.query.all()
+
+    # Crear el DataFrame
     df = pd.DataFrame([{
         'ID': c.id,
         'Documento': c.documento,
         'Nombre': c.nombres,
-        'Apellido': c.apellidos
+        'Apellido': c.apellidos,
+        'Celular': c.celular
+    } for c in clientes])
+
+    # Guardar el archivo en memoria
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        df.to_excel(writer, index=False, sheet_name='Clientes')
+
+    output.seek(0)
+
+    # Este return es fundamental
+    return send_file(
+        output,
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        download_name='clientes.xlsx',
+        as_attachment=True
+    )

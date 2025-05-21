@@ -9,6 +9,7 @@ import io
 import csv
 import pandas as pd
 
+
 products_bp = Blueprint("products", __name__, url_prefix="/productos")
 
 
@@ -23,7 +24,6 @@ def list_products():
     page = request.args.get('page', 1, type=int)
     search = request.args.get('search', '').strip()
     estado = request.args.get('estado', '')
-
     query = Producto.query
     if search:
         query = query.filter(
@@ -36,36 +36,51 @@ def list_products():
 
     pagination = query.order_by(Producto.id.desc()).paginate(page=page, per_page=10)
     productos = pagination.items
+    
+    categorias = Categoria.query.all()
 
     return render_template(
         'products/list.html',
         productos=productos,
         pagination=pagination,
         search=search,
-        estado=estado
+        estado=estado,categorias=categorias
     )
 
 @products.route('/exportar', methods=['GET'])
 @login_required
 def export_products_excel():
+    import pandas as pd
+    import io
+    from flask import send_file
+
     productos = Producto.query.order_by(Producto.id.desc()).all()
 
-    def generate():
-        data = csv.writer([])
-        # Encabezados
-        yield ','.join(['ID', 'Código', 'Nombre', 'Marca', 'Precio', 'Estado']) + '\n'
-        for p in productos:
-            row = [
-                str(p.id),
-                p.codigo,
-                p.nombre,
-                p.marca,
-                f"S/. {p.precio:.2f}",
-                'Activo' if p.activo else 'Inactivo'
-            ]
-            yield ','.join(row) + '\n'
-    return Response(generate(), mimetype='text/csv',
-                    headers={'Content-Disposition': 'attachment;filename=productos.csv'})
+    # Crear DataFrame con los productos
+    df = pd.DataFrame([{
+        'ID': p.id,
+        'Código': p.codigo,
+        'Nombre': p.nombre,
+        'Marca': p.marca,
+        'Precio': f"S/. {p.precio:.2f}",
+        'Estado': 'Activo' if p.activo else 'Inactivo'
+    } for p in productos])
+
+    # Guardar en un archivo Excel en memoria
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        df.to_excel(writer, index=False, sheet_name='Productos')
+
+    output.seek(0)
+
+    # Enviar archivo al navegador
+    return send_file(
+        output,
+        download_name="productos.xlsx",
+        as_attachment=True,
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+
 
 @products.route('/editar/<int:product_id>', methods=['GET', 'POST'])
 @login_required
@@ -152,10 +167,6 @@ def create_product():
     flash('Producto agregado correctamente', 'success')
     return redirect(url_for('products.list_products'))
 
-from flask import render_template, request, redirect, url_for, flash
-from flask_login import login_required
-from app.extensions import db
-from app.models.producto import Producto
-from app.models.categoria import Categoria
+
 
 # ...

@@ -144,10 +144,10 @@
       <a href="{{ url_for('main.dashboard') }}"
          class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}">Inicio</a>
     </li>
-    <li class="nav-item">
-      <a href="{{ url_for('orders.list_orders') }}"
-         class="nav-link {% if request.endpoint.startswith('orders.') %}active{% endif %}">Órdenes</a>
-    </li>
+     <li class="nav-item">
+   <a href="{{ url_for('orden.list_orders') }}"
+class="nav-link {% if request.endpoint.startswith('orden.') %}active{% endif %}">Órdenes</a>
+ </li>
     <li class="nav-item">
       <a href="{{ url_for('receipts.list_receipts') }}"
          class="nav-link {% if request.endpoint == 'receipts.list_receipts' %}active{% endif %}">Comprobantes</a>
@@ -174,8 +174,24 @@
 
   <!-- CONTENIDO -->
   <main class="main-content">
+
+    <!-- Mensajes flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="container mb-3">
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
     {% block content %}{% endblock %}
   </main>
+
 
   <!-- SCRIPTS -->
 
@@ -195,6 +211,8 @@
   
   <!-- Bootstrap JS Bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-  {% block scripts %}{% endblock %}
+  {% block scripts %}  
+  {% endblock %}
+
 </body>
 </html>

@@ -2,65 +2,20 @@
 {% block title %}Gestión de Productos – TECMECH{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <!-- Sidebar fijo -->
-  <nav class="sidebar">
-    <h5 class="px-3 text-white">Administrador</h5>
-    <ul class="nav flex-column">
-      <li class="nav-item">
-        <a href="{{ url_for('main.dashboard') }}"
-           class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}">
-          Inicio
-        </a>
-      </li>
-      <li class="nav-item">
-        <a href="{{ url_for('orders.list_orders') }}"
-           class="nav-link {% if request.endpoint.startswith('orders.') %}active{% endif %}">
-          Órdenes
-        </a>
-      </li>
-      <li class="nav-item">
-        <a href="{{ url_for('receipts.list_receipts') }}"
-          class="nav-link text-white {% if active=='comprobantes' %}active{% endif %}">
-          Comprobantes
-        </a>
-
-      </li>
-      <li class="nav-item">
-        <a href="{{ url_for('products.list_products') }}"
-           class="nav-link {% if request.endpoint.startswith('products.') %}active{% endif %}">
-          Productos
-        </a>
-      </li>
-      <li class="nav-item">
-        <a href="{{ url_for('main.lista_clientes') }}"
-           class="nav-link {% if request.endpoint == 'main.lista_clientes' %}active{% endif %}">
-          Clientes
-        </a>
-
-      </li>
-    </ul>
-
-    <!-- Botón Cerrar Sesión fijo -->
-    <div class="sidebar-logout-container">
-      <a href="{{ url_for('main.logout') }}" class="btn-logout-sidebar">Cerrar sesión</a>
-    </div>
-  </nav>
-
-  
-
 
     <!-- Contenido principal -->
     <div class="flex-grow-1">
     <div class="justify-content-between ">
       <h2 class="mb-4">Listado de Productos</h2>
       <hr>
+
+
       <!-- Herramientas: Exportar, Nuevo y Búsqueda -->
       <div class="d-flex justify-content-between align-items-center">
         <div class="d-flex gap-2">
           <a href="{{ url_for('products.export_products_excel') }}" class="btn btn-success">
           <i class="fas fa-file-csv"></i> Exportar Excel</a>
-          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#clientModal">
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevoProductoModal">
             <i class="fas fa-plus"></i> Nuevo
           </button>
         </div>
@@ -81,7 +36,6 @@
     </select>
   </form>
 
-
   <table class="table table-hover table-striped">
   <thead class="table-dark">
     <tr>
@@ -95,6 +49,8 @@
     </tr>
   </thead>
   <tbody>
+
+    
     {% for p in productos %}
     <tr>
       <td>{{ p.id }}</td>
@@ -286,8 +242,17 @@
     });
   });
 </script>
-{% endblock %}
 
+<script>
+  setTimeout(() => {
+    document.querySelectorAll('.alert').forEach(alert => {
+      const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+      bsAlert.close();
+    });
+  }, 4000);
+</script>
+
+{% endblock %}
 
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>

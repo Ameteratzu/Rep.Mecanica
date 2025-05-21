@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container my-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Órdenes</h2>
+    <!-- Botón para abrir modal de crear -->
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCreate">
+      <i class="fa fa-plus"></i> Nueva Orden
+    </button>
+  </div>
+
+
+  <button class="btn btn-success mb-3" onclick="exportToExcel()">Exportar a Excel</button>
+
+<script>
+function exportToExcel() {
+    var table = document.getElementById("ordenesTable");
+    if (!table) {
+        alert("No se encontró la tabla para exportar.");
+        return;
+    }
+    var wb = XLSX.utils.table_to_book(table, {sheet: "Órdenes"});
+    var wbout = XLSX.write(wb, {bookType: 'xlsx', type: 'array'});
+    saveAs(new Blob([wbout], {type: "application/octet-stream"}), 'ordenes.xlsx');
+}
+</script>
+
+
+
+  <!-- Tabla de órdenes -->
+  <div class="table-responsive" >
+    <table class="table table-striped table-bordered align-middle" id="ordenesTable">
+      <thead class="table-dark">
+        <tr>
+          <th>ID</th>
+          <th>Número</th>
+          <th>Fecha</th>
+          <th>Cliente</th>
+          <th>Usuario</th>
+          <th>Automóvil</th>
+          <th>Total</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for orden in ordenes %}
+        <tr>
+          <td>{{ orden.id }}</td>
+          <td>{{ orden.numero }}</td>
+          <td>{{ orden.fecha.strftime('%Y-%m-%d') if orden.fecha else '' }}</td>
+          <td>{{ orden.cliente_id }}</td>
+          <td>{{ orden.usuario_id }}</td>
+          <td>{{ orden.automovil_id }}</td>
+          <td>{{ orden.total }}</td>
+          <td>{{ orden.estado }}</td>
+          <td>
+            <!-- Botón Editar -->
+            <button type="button" class="btn btn-sm btn-warning me-1"
+              onclick="openEditModal({{ orden.id }}, '{{ orden.numero }}', '{{ orden.cliente_id }}', '{{ orden.usuario_id }}', '{{ orden.automovil_id }}', '{{ orden.total }}', '{{ orden.estado_orden_id }}', '{{ orden.estado }}')">
+              <i class="fa fa-edit"></i> Editar
+            </button>
+            <!-- Botón Eliminar -->
+            <form action="{{ url_for('orden.delete_order', id=orden.id) }}" method="post" class="d-inline">
+              <button type="submit" class="btn btn-sm btn-danger"
+                onclick="return confirm('¿Seguro que deseas eliminar esta orden?')">
+                <i class="fa fa-trash"></i> Eliminar
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="9" class="text-center">No hay órdenes registradas.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal Crear Orden -->
+<div class="modal fade" id="modalCreate" tabindex="-1" aria-labelledby="modalCreateLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form action="{{ url_for('orden.create_order') }}" method="post">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalCreateLabel">Nueva Orden</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Número</label>
+            <input type="text" name="numero" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Cliente ID</label>
+            <input type="number" name="cliente_id" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Usuario ID</label>
+            <input type="number" name="usuario_id" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Automóvil ID</label>
+            <input type="number" name="automovil_id" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Descuento</label>
+            <input type="number" step="0.01" name="descuento" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Total</label>
+            <input type="number" step="0.01" name="total" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Estado Orden ID</label>
+            <input type="number" name="estado_orden_id" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Estado</label>
+            <input type="text" name="estado" class="form-control" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Crear</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Editar Orden -->
+<div class="modal fade" id="modalEdit" tabindex="-1" aria-labelledby="modalEditLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="editForm" method="post">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalEditLabel">Editar Orden</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" name="id" id="edit_id">
+          <div class="mb-3">
+            <label class="form-label">Número</label>
+            <input type="text" name="numero" id="edit_numero" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Cliente ID</label>
+            <input type="number" name="cliente_id" id="edit_cliente_id" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Usuario ID</label>
+            <input type="number" name="usuario_id" id="edit_usuario_id" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Automóvil ID</label>
+            <input type="number" name="automovil_id" id="edit_automovil_id" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Descuento</label>
+            <input type="number" step="0.01" name="descuento" id="edit_descuento" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Total</label>
+            <input type="number" step="0.01" name="total" id="edit_total" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Estado Orden ID</label>
+            <input type="number" name="estado_orden_id" id="edit_estado_orden_id" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Estado</label>
+            <input type="text" name="estado" id="edit_estado" class="form-control" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-warning">Actualizar</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+function openEditModal(id, numero, cliente_id, usuario_id, automovil_id, total, estado_orden_id, estado) {
+  // Rellenar los campos del modal
+  document.getElementById('edit_id').value = id;
+  document.getElementById('edit_numero').value = numero;
+  document.getElementById('edit_cliente_id').value = cliente_id;
+  document.getElementById('edit_usuario_id').value = usuario_id;
+  document.getElementById('edit_automovil_id').value = automovil_id;
+  document.getElementById('edit_total').value = total;
+  document.getElementById('edit_estado_orden_id').value = estado_orden_id;
+  document.getElementById('edit_estado').value = estado;
+  document.getElementById('editForm').action = "/orden/update/" + id;
+  // Mostrar el modal Bootstrap
+  var modal = new bootstrap.Modal(document.getElementById('modalEdit'));
+  modal.show();
+}
+</script>
+{% endblock %}
