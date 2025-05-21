@@ -49,7 +49,7 @@ def list_cliente():
 def nuevo_cliente():
     if request.method == "POST":
         # Obtener los datos del formulario
-        tipo_documento = request.form.get("tipo_documento")  # usar paréntesis
+        tipo_documento = request.form.get("tipoDocumento")  # usar paréntesis
         documento = request.form.get("documento")            # usar request.form.get
         nombres = request.form["nombres"]                     # está bien usar corchetes si seguro existe
         apellidos = request.form["apellidos"]
@@ -108,6 +108,8 @@ def editar_cliente(cliente_id):
         cliente.apellidos = request.form["apellidos"]
         cliente.documento = request.form["documento"]
         cliente.celular = request.form["celular"]
+        cliente.tipo_documento = request.form["tipo_documento"]  # <-- Aquí se actualiza el tipo_documento
+
         cliente.activo = request.form.get("activo") == "1"  # Esto no funciona bien si recibes "0" o "1"
 
         db.session.commit()  # Guardar cambios en la base de datos
@@ -115,7 +117,6 @@ def editar_cliente(cliente_id):
         return redirect(url_for('cliente.list_cliente'))  # Redirigir al listado de clientes
 
     return render_template("cliente/editar_cliente.html", cliente=cliente)
-
 # Ruta para eliminar un cliente
 @cliente_bp.route('/eliminar/<int:cliente_id>', methods=["POST"])
 @login_required

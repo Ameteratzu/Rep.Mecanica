@@ -62,7 +62,7 @@
       <td>
         <a href="{{ url_for('products.edit_product', product_id=p.id) }}"
           class="btn btn-sm btn-warning" title="Editar">
-          <i class="fas fa-edit"></i>
+          <i class="fas fa-edit">Editar</i>
         </a>
         <form action="{{ url_for('products.delete_product', product_id=p.id) }}"
               method="post" style="display:inline">
@@ -70,7 +70,7 @@
                   class="btn btn-sm btn-danger"
                   onclick="return confirm('¿Estás seguro de eliminar este producto?')"
                   title="Eliminar">
-            <i class="fas fa-trash"></i>
+            <i class="fas fa-trash">Eliminar</i>
           </button>
         </form>
       </td>

@@ -15,7 +15,7 @@ class Cliente(db.Model):
     correo         = db.Column(db.String(120), nullable=True)
     ubigeo_id      = db.Column(db.Integer, db.ForeignKey("ubigeos.id"), nullable=False)
     direccion      = db.Column(db.String(255))
-    celular        = db.Column(db.String(15))
+    celular         = db.Column(db.String(15))
     activo         = db.Column(db.Boolean, default=True)
 
     ubigeo         = db.relationship("Ubigeo", back_populates="clientes")
