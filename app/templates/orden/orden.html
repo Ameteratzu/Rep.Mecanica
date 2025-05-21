@@ -11,18 +11,58 @@
   </div>
 
 
+
+  <!-- Filtro de fecha -->
+  <div class="mb-3 d-flex align-items-center gap-2">
+    <label for="filterFecha" class="form-label mb-0">Filtrar por fecha:</label>
+    <input type="date" id="filterFecha" class="form-control" style="max-width: 200px;">
+    <button class="btn btn-secondary" onclick="clearDateFilter()">Limpiar</button>
+  </div>
+
   <button class="btn btn-success mb-3" onclick="exportToExcel()">Exportar a Excel</button>
 
+  <!-- ... (resto de tu código) ... -->
+</div>
+
+
 <script>
-function exportToExcel() {
-    var table = document.getElementById("ordenesTable");
-    if (!table) {
-        alert("No se encontró la tabla para exportar.");
-        return;
+
+
+// Filtro de fecha para la tabla
+document.addEventListener('DOMContentLoaded', function() {
+  const filterInput = document.getElementById('filterFecha');
+  filterInput.addEventListener('input', function() {
+    filterTableByDate(this.value);
+  });
+});
+
+function filterTableByDate(dateStr) {
+  const table = document.getElementById('ordenesTable');
+  const rows = table.querySelectorAll('tbody tr');
+  rows.forEach(row => {
+    const fechaCell = row.querySelector('td:nth-child(3)');
+    if (!fechaCell) return;
+    const rowDate = fechaCell.textContent.trim();
+    if (!dateStr) {
+      row.style.display = '';
+    } else {
+      // rowDate formato: 'YYYY-MM-DD'
+      row.style.display = (rowDate === dateStr) ? '' : 'none';
     }
-    var wb = XLSX.utils.table_to_book(table, {sheet: "Órdenes"});
-    var wbout = XLSX.write(wb, {bookType: 'xlsx', type: 'array'});
-    saveAs(new Blob([wbout], {type: "application/octet-stream"}), 'ordenes.xlsx');
+  });
+}
+
+function clearDateFilter() {
+  document.getElementById('filterFecha').value = '';
+  filterTableByDate('');
+}
+
+
+
+ function exportToExcel() {
+    var table = document.getElementById('ordenesTable');
+    var wb = XLSX.utils.table_to_book(table, {sheet:"Sheet 1"});
+    XLSX.writeFile(wb, 'mi_archivo.xlsx');
 }
 </script>
 
