@@ -159,4 +159,3 @@ def export_excel():
         download_name='clientes.xlsx',
         as_attachment=True
     )
-    
