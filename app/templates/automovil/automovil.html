@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+    <h1>Automóviles</h1>
+    <!-- Botón para abrir modal de nuevo automóvil -->
+    <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#nuevoAutomovilModal">Nuevo Automóvil</button>
+    <!-- Tabla de automóviles -->
+    <table class="table table-striped table-bordered align-middle" id="automovilesTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Cliente ID</th>
+                <th>Placa</th>
+                <th>Marca</th>
+                <th>Modelo</th>
+                <th>Año</th>
+                <th>Color</th>
+                <th>Activo</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for automovil in automoviles %}
+            <tr>
+                <td>{{ automovil.id }}</td>
+                <td>{{ automovil.cliente_id }}</td>
+                <td>{{ automovil.placa }}</td>
+                <td>{{ automovil.marca }}</td>
+                <td>{{ automovil.modelo }}</td>
+                <td>{{ automovil.año or '' }}</td>
+                <td>{{ automovil.color }}</td>
+                <td>
+                    {% if automovil.activo is none %}
+                        <span class="text-muted">N/A</span>
+                    {% elif automovil.activo %}
+                        <span class="text-success">Sí</span>
+                    {% else %}
+                        <span class="text-danger">No</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <!-- Botón editar -->
+                    <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editarAutomovilModal{{ automovil.id }}">Editar</button>
+                    <!-- Formulario eliminar -->
+                    <form action="{{ url_for('automovil.delete_automovil', id=automovil.id) }}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar este automóvil?')">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+            <!-- Modal editar automóvil -->
+            <div class="modal fade" id="editarAutomovilModal{{ automovil.id }}" tabindex="-1" aria-labelledby="editarAutomovilLabel{{ automovil.id }}" aria-hidden="true">
+              <div class="modal-dialog">
+                <form action="{{ url_for('automovil.update_automovil', id=automovil.id) }}" method="post">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="editarAutomovilLabel{{ automovil.id }}">Editar Automóvil</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="cliente_id{{ automovil.id }}" class="form-label">Cliente ID</label>
+                            <input type="number" class="form-control" id="cliente_id{{ automovil.id }}" name="cliente_id" value="{{ automovil.cliente_id }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="placa{{ automovil.id }}" class="form-label">Placa</label>
+                            <input type="text" class="form-control" id="placa{{ automovil.id }}" name="placa" value="{{ automovil.placa }}" maxlength="10" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="marca{{ automovil.id }}" class="form-label">Marca</label>
+                            <input type="text" class="form-control" id="marca{{ automovil.id }}" name="marca" value="{{ automovil.marca }}" maxlength="50" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="modelo{{ automovil.id }}" class="form-label">Modelo</label>
+                            <input type="text" class="form-control" id="modelo{{ automovil.id }}" name="modelo" value="{{ automovil.modelo }}" maxlength="50" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="año{{ automovil.id }}" class="form-label">Año</label>
+                            <input type="number" class="form-control" id="año{{ automovil.id }}" name="año" value="{{ automovil.año or '' }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="color{{ automovil.id }}" class="form-label">Color</label>
+                            <input type="text" class="form-control" id="color{{ automovil.id }}" name="color" value="{{ automovil.color }}" maxlength="30" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="activo{{ automovil.id }}" class="form-label">Activo</label>
+                            <select class="form-select" id="activo{{ automovil.id }}" name="activo">
+                                <option value="" {% if automovil.activo is none %}selected{% endif %}>N/A</option>
+                                <option value="1" {% if automovil.activo %}selected{% endif %}>Sí</option>
+                                <option value="0" {% if automovil.activo is not none and not automovil.activo %}selected{% endif %}>No</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                      <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal nuevo automóvil -->
+<div class="modal fade" id="nuevoAutomovilModal" tabindex="-1" aria-labelledby="nuevoAutomovilLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form action="{{ url_for('automovil.create_automovil') }}" method="post">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="nuevoAutomovilLabel">Nuevo Automóvil</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+            <div class="mb-3">
+                <label for="cliente_id" class="form-label">Cliente ID</label>
+                <input type="number" class="form-control" id="cliente_id" name="cliente_id" required>
+            </div>
+            <div class="mb-3">
+                <label for="placa" class="form-label">Placa</label>
+                <input type="text" class="form-control" id="placa" name="placa" maxlength="10" required>
+            </div>
+            <div class="mb-3">
+                <label for="marca" class="form-label">Marca</label>
+                <input type="text" class="form-control" id="marca" name="marca" maxlength="50" required>
+            </div>
+            <div class="mb-3">
+                <label for="modelo" class="form-label">Modelo</label>
+                <input type="text" class="form-control" id="modelo" name="modelo" maxlength="50" required>
+            </div>
+            <div class="mb-3">
+                <label for="año" class="form-label">Año</label>
+                <input type="number" class="form-control" id="año" name="año">
+            </div>
+            <div class="mb-3">
+                <label for="color" class="form-label">Color</label>
+                <input type="text" class="form-control" id="color" name="color" maxlength="30" required>
+            </div>
+            <div class="mb-3">
+                <label for="activo" class="form-label">Activo</label>
+                <select class="form-select" id="activo" name="activo">
+                    <option value="" selected>N/A</option>
+                    <option value="1">Sí</option>
+                    <option value="0">No</option>
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Crear</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

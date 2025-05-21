@@ -59,6 +59,10 @@ def create_app():
     from app.blueprints.orden.route import orden_bpp
     app.register_blueprint(orden_bpp)
 
+    # automovil
+    from app.blueprints.automovil.route import automovil_bpp
+    app.register_blueprint(automovil_bpp)
+
     # Comprobantes
     from app.blueprints.comprobantes.routes import comprobantes_bp
     app.register_blueprint(comprobantes_bp)
