@@ -13,7 +13,7 @@
 
   <form method="get" class="row mb-3 align-items-end">
     <div class="col-md-3">
-      <label for="filter-state" class="form-label">Filtrar por estado:</label>
+      <label id="filter-state" class="form-label">Filtrar por estado:</label>
       <select name="estado" class="form-select" onchange="this.form.submit()">
         <option value="Todos" {% if estado == 'Todos' %}selected{% endif %}>Todos</option>
         <option value="Activo" {% if estado == 'Activo' %}selected{% endif %}>Activo</option>
@@ -21,7 +21,7 @@
       </select>
     </div>
     <div class="col-md-5">
-      <label for="search" class="form-label">Buscar:</label>
+      <label id="search" class="form-label">Buscar:</label>
       <input type="text" name="search" class="form-control" placeholder="Nombre, Documento, Celular..." value="{{ search|default('') }}">
     </div>
     <div class="col-md-2">
@@ -108,7 +108,7 @@
           <form method="POST" action="{{ url_for('cliente.nuevo_cliente') }}">
             <div class="row">
               <div class="col-md-6">
-                <label for="tipo_documento" class="form-label">Tipo Documento</label>
+                <label for="tipo_documento"   class="form-label">Tipo Documento</label>
                 <select name="tipo_documento" id="tipo_documento" class="form-select" required>
                   <option value="">Seleccione</option>
                   <option value="DNI">DNI</option>
@@ -147,7 +147,7 @@
 
             <div class="row mt-3">
   <div class="col-md-6">
-    <label for="ubigeo" class="form-label">Ubigeo</label>
+    <label id="ubigeo" class="form-label">Ubigeo</label>
     <select name="ubigeo" class="form-select" required>
       <option value="" disabled {% if not cliente %}selected{% endif %}>Seleccione el Ubigeo</option>
       {% for ubigeo in ubigeos %}

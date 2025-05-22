@@ -6,11 +6,11 @@
   <form method="POST">
     <div class="row">
       <div class="col-md-6">
-        <label for="nombres" class="form-label">Nombres</label>
+        <label id="nombres" class="form-label">Nombres</label>
         <input type="text" name="nombres" class="form-control" value="{{ cliente.nombres }}" required>
       </div>
       <div class="col-md-6">
-        <label for="apellidos" class="form-label">Apellidos</label>
+        <label id="apellidos" class="form-label">Apellidos</label>
         <input type="text" name="apellidos" class="form-control" value="{{ cliente.apellidos }}" required>
       </div>
     </div>
@@ -25,18 +25,18 @@
 </div>
     <div class="row mt-3">
       <div class="col-md-6">
-        <label for="documento" class="form-label">Nº Documento</label>
+        <label id="documento" class="form-label">Nº Documento</label>
         <input type="text" name="documento" class="form-control" value="{{ cliente.documento }}" required>
       </div>
       <div class="col-md-6">
-        <label for="celular" class="form-label">Celular</label>
+        <label id="celular" class="form-label">Celular</label>
         <input type="text" name="celular" class="form-control" value="{{ cliente.celular }}" required>
       </div>
     </div>
 
     <div class="row mt-3">
       <div class="col-md-6">
-        <label for="estado" class="form-label">Estado</label>
+        <label id="estado" class="form-label">Estado</label>
         <select name="activo" class="form-select" required>
           <option value="1" {% if cliente.activo %}selected{% endif %}>Activo</option>
           <option value="0" {% if not cliente.activo %}selected{% endif %}>Inactivo</option>

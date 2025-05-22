@@ -1,15 +1,34 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
+
+from app.blueprints.automovil.route import automovil_bpp
 from app.models.orden import Orden
 from app.extensions import db
 from datetime import datetime
-
+from app.models.cliente import Cliente
+from app.models.usuario import User
+from app.models.automovil import Automovil
+from app.models.servicio import Servicio
+from app.models.estado_orden import EstadoOrden
 orden_bpp = Blueprint('orden', __name__)
 
 @orden_bpp.route('/orden')
 def list_orders():
     ordenes = Orden.query.all()
-    return render_template('orden/orden.html', ordenes=ordenes)
+    clientes = Cliente.query.filter_by(tipo_documento='DNI').all()
+    usuarios = User.query.all()
+    automoviles = Automovil.query.all()
+    servicios = Servicio.query.all()
+    estadosordenes = EstadoOrden.query.all()  # Debe ser la lista, no la clase
 
+    return render_template(
+        'orden/orden.html',
+        ordenes=ordenes,
+        clientes=clientes,
+        usuarios=usuarios,
+        automoviles=automoviles,
+        estadosordenes=estadosordenes,  # Aquí se pasa la lista, no la clase
+        servicios=servicios
+    )
 @orden_bpp.route('/orden/create', methods=['POST'])
 def create_order():
     try:
