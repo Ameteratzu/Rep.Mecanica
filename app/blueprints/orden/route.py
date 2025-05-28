@@ -21,7 +21,7 @@ def list_orders():
     estadosordenes = EstadoOrden.query.all()  # Debe ser la lista, no la clase
 
     return render_template(
-        'orden/orden.html',
+        'orden/listar.html',
         ordenes=ordenes,
         clientes=clientes,
         usuarios=usuarios,
@@ -62,6 +62,8 @@ def create_order():
     return redirect(url_for('orden.list_orders'))
 
 @orden_bpp.route('/orden/update/<int:id>', methods=['POST'])
+
+
 def update_order(id):
     orden = Orden.query.get_or_404(id)
     try:

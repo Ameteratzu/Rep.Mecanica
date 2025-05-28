@@ -1,0 +1,688 @@
+{% extends "base.html" %}
+
+
+
+{% block content %}
+
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">Órdenes</h2>
+        <!-- Botón para abrir modal de crear -->
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCreate">
+            <i class="fa fa-plus"></i> Nueva Orden
+        </button>
+    </div>
+
+
+    <!-- Filtro de fecha -->
+    <div class="mb-3 d-flex align-items-center gap-2">
+        <label for="filterFecha" class="form-label mb-0">Filtrar por fecha:</label>
+        <input type="date" id="filterFecha" class="form-control" style="max-width: 200px;">
+        <button class="btn btn-secondary" onclick="clearDateFilter()">Limpiar</button>
+    </div>
+
+    <button class="btn btn-success mb-3" onclick="exportToExcel()">Exportar a Excel</button>
+
+    <!-- ... (resto de tu código) ... -->
+</div>
+
+
+<!-- Tabla de órdenes -->
+<div class="table-responsive">
+    <table class="table table-striped table-bordered align-middle" id="ordenesTable">
+        <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Número</th>
+            <th>Fecha</th>
+            <th>Cliente</th>
+            <th>Usuario</th>
+            <th>Automóvil</th>
+            <th>Total</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for orden in ordenes %}
+        <tr>
+            <td>{{ orden.id }}</td>
+            <td>{{ orden.numero }}</td>
+            <td>{{ orden.fecha.strftime('%Y-%m-%d') if orden.fecha else '' }}</td>
+            <td>{{ orden.cliente_id }}</td>
+            <td>{{ orden.usuario_id }}</td>
+            <td>{{ orden.automovil_id }}</td>
+            <td>{{ orden.total }}</td>
+            <td>{{ orden.estado }}</td>
+            <td>
+                <!-- Botón Editar -->
+                <button type="button" class="btn btn-sm btn-warning me-1" style="width:9em !important;"
+                        onclick="openEditModal({{ orden.id }}, '{{ orden.numero }}', '{{ orden.cliente_id }}', '{{ orden.usuario_id }}', '{{ orden.automovil_id }}', '{{ orden.total }}', '{{ orden.estado_orden_id }}', '{{ orden.estado }}')">
+                    <i class="fa fa-edit"></i> Editar
+                </button>
+                <!-- Botón Eliminar -->
+                <form action="{{ url_for('orden.delete_order', id=orden.id) }}" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-sm btn-danger" style="width:9em !important;"
+                            onclick="return confirm('¿Seguro que deseas eliminar esta orden?')">
+                        <i class="fa fa-trash"></i> Eliminar
+                    </button>
+                </form>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="9" class="text-center">No hay órdenes registradas.</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Aqui se incluye los modal para no obstruir espacio de tabla -->
+
+{% include 'orden/crear.html' %}
+{% include 'orden/editar.html' %}
+{% include 'orden/eliminar.html' %}
+
+
+<!-- Modal Seleccionar Servicios -->
+<div class="modal fade" id="modalSeleccionarServicios" tabindex="-1" aria-labelledby="modalSeleccionarServiciosLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalSeleccionarServiciosLabel">Seleccionar Servicio(s)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                    <table class="table table-bordered table-hover" id="tablaServicios">
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th>Nombre</th>
+                            <th>Precio</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for servicio in servicios %}
+                        <tr>
+                            <td>
+                                <input type="checkbox" class="check-servicio" value="{{ servicio.id }}"
+                                       data-nombre="{{ servicio.nombre }}"
+                                       data-precio="{{ servicio.precio }}">
+                            </td>
+                            <td>{{ servicio.nombre }}</td>
+                            <td>{{ servicio.precio }}</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="confirmarServicios">Confirmar Selección</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal Seleccionar Servicios para un Vehículo -->
+<div class="modal fade" id="modalSeleccionarServiciosPorVehiculo" tabindex="-1"
+     aria-labelledby="modalSeleccionarServiciosPorVehiculoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalSeleccionarServiciosPorVehiculoLabel">
+                    Seleccionar Servicios para <span id="vehiculoActual"></span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                    <table class="table table-bordered table-hover" id="tablaServiciosPorVehiculo">
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Precio</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for servicio in servicios %}
+                        <tr>
+                            <td>
+                                <input type="checkbox" class="check-servicio-por-vehiculo" value="{{ servicio.id }}"
+                                       data-nombre="{{ servicio.nombre }}">
+                            </td>
+                            <td>{{ servicio.id }}</td>
+                            <td>{{ servicio.nombre }}</td>
+                            <td>{{ servicio.precio }}</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="confirmarServiciosPorVehiculo">Confirmar Selección
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal Servicios por Vehículo Seleccionado -->
+<div class="modal fade" id="modalServiciosPorVehiculo" tabindex="-1" aria-labelledby="modalServiciosPorVehiculoLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalServiciosPorVehiculoLabel">Servicios por Vehículo Seleccionado</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" id="tablaVehiculosServicios">
+                        <thead>
+                        <tr>
+                            <th>Modelo</th>
+                            <th>Acción</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <!-- Las filas se llenarán dinámicamente con JS según los vehículos seleccionados -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-target="modalSeleccionarServiciosPorVehiculo"
+                        data-bs-dismiss="modal">Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal Seleccionar Vehículo -->
+<div class="modal fade" id="modalSeleccionarAutomovil" tabindex="-1" aria-labelledby="modalSeleccionarAutomovilLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalSeleccionarAutomovilLabel">Seleccionar Vehículo(s)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Bloques de placas seleccionadas -->
+                <div id="placasSeleccionadas" class="mb-3 d-flex flex-wrap gap-2"></div>
+                <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                    <div class="mb-3">
+                        <label for="buscarVehiculoInput" class="form-label">Buscar vehículo</label>
+                        <input type="text" id="buscarVehiculoInput" class="form-control"
+                               placeholder="Buscar por placa, marca o modelo...">
+                    </div>
+                    <table class="table table-bordered table-hover" id="tablaAutomoviles">
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th>Placa</th>
+                            <th>Marca</th>
+                            <th>Modelo</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for auto in automoviles %}
+                        <tr>
+                            <td>
+                                <input type="checkbox" class="check-automovil" value="{{ auto.id }}"
+                                       data-placa="{{ auto.placa }}"
+                                       data-marca="{{ auto.marca }}"
+                                       data-modelo="{{ auto.modelo }}">
+                            </td>
+                            <td>{{ auto.placa }}</td>
+                            <td>{{ auto.marca }}</td>
+                            <td>{{ auto.modelo }}</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" id="confirmarAutomovil">Confirmar Selección</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal Buscar Cliente -->
+<div class="modal fade" id="modalBuscarCliente" tabindex="-1" aria-labelledby="modalBuscarClienteLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalBuscarClienteLabel">Buscar Cliente por DNI</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="buscarDniInput" class="form-label">Buscar por DNI</label>
+                    <input type="text" id="buscarDniInput" class="form-control"
+                           placeholder="Ingrese DNI para buscar...">
+                </div>
+                <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                    <table class="table table-bordered table-hover" id="tablaClientes">
+                        <thead>
+                        <tr>
+                            <th>DNI</th>
+                            <th>Nombre</th>
+                            <th>Apellidos</th>
+                            <th>Acción</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for cliente in clientes %}
+                        <tr>
+                            <td>{{ cliente.documento }}</td>
+                            <td>{{ cliente.nombres }}</td>
+                            <td>{{ cliente.apellidos }}</td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-success seleccionar-cliente"
+                                        data-id="{{ cliente.id }}"
+                                        data-nombre="{{ cliente.nombres }} {{ cliente.apellidos }}">
+                                    Seleccionar
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal Buscar Usuario -->
+<div class="modal fade" id="modalBuscarUsuario" tabindex="-1" aria-labelledby="modalBuscarUsuarioLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalBuscarUsuarioLabel">Buscar Usuario</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="buscarUsuarioInput" class="form-label">Buscar por correo o ID</label>
+                    <input type="text" id="buscarUsuarioInput" class="form-control"
+                           placeholder="Ingrese correo o ID para buscar...">
+                </div>
+                <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                    <table class="table table-bordered table-hover" id="tablaUsuario">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Correo</th>
+                            <th>Acción</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for usuario in usuarios %}
+                        <tr>
+                            <td>{{ usuario.id }}</td>
+                            <td>{{ usuario.email }}</td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-success seleccionar-usuario"
+                                        data-id="{{ usuario.id }}"
+                                        data-nombre="{{ usuario.email }}">
+                                    Seleccionar
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    // --- create_numero: Generar número de orden automáticamente ---
+  document.addEventListener('DOMContentLoaded', function() {
+    var modalCreate = document.getElementById('modalCreate');
+    modalCreate.addEventListener('show.bs.modal', function () {
+      // Buscar el mayor número de orden actual en la tabla
+      var maxNum = 0;
+      var table = document.getElementById('ordenesTable');
+      if (table) {
+        var rows = table.querySelectorAll('tbody tr');
+        rows.forEach(function(row) {
+          var numCell = row.querySelector('td:nth-child(2)');
+          if (numCell) {
+            var match = numCell.textContent.trim().match(/^ORD-(\d+)$/);
+            if (match) {
+              var num = parseInt(match[1]);
+              if (num > maxNum) maxNum = num;
+            }
+          }
+        });
+      }
+      // Siguiente número
+      var nextNum = maxNum + 1;
+      document.getElementById('create_numero').value = 'ORD-' + nextNum;
+    });
+  });
+
+  // filtracionr clientes por DNI en el modal
+  document.addEventListener('DOMContentLoaded', function() {
+    const buscarDniInput = document.getElementById('buscarDniInput');
+    const tablaClientes = document.getElementById('tablaClientes').getElementsByTagName('tbody')[0];
+
+    buscarDniInput.addEventListener('input', function() {
+      const filtro = this.value.trim();
+      Array.from(tablaClientes.rows).forEach(row => {
+        const dni = row.cells[0].textContent.trim();
+        row.style.display = dni.includes(filtro) ? '' : 'none';
+      });
+    });
+
+    // Seleccionar cliente y cerrar modal
+    tablaClientes.addEventListener('click', function(e) {
+      if (e.target.classList.contains('seleccionar-cliente')) {
+        const id = e.target.getAttribute('data-id');
+        const nombre = e.target.getAttribute('data-nombre');
+        document.getElementById('cliente_id').value = id;
+        document.getElementById('cliente_nombre').value = nombre;
+        // Cerrar modal
+        var modal = bootstrap.Modal.getInstance(document.getElementById('modalBuscarCliente'));
+        modal.hide();
+      }
+    });
+  });
+  // Filtrar usuarios por ID o correo en el modal
+  document.addEventListener('DOMContentLoaded', function() {
+    const buscarUsuarioInput = document.getElementById('buscarUsuarioInput');
+    const tablaUsuario = document.getElementById('tablaUsuario').getElementsByTagName('tbody')[0];
+
+    buscarUsuarioInput.addEventListener('input', function() {
+      const filtro = this.value.trim().toLowerCase();
+      Array.from(tablaUsuario.rows).forEach(row => {
+        const id = row.cells[0].textContent.trim();
+        const correo = row.cells[1].textContent.trim().toLowerCase();
+        row.style.display = (id.includes(filtro) || correo.includes(filtro)) ? '' : 'none';
+      });
+    });
+
+    // Seleccionar usuario y cerrar modal
+    tablaUsuario.addEventListener('click', function(e) {
+      if (e.target.classList.contains('seleccionar-usuario')) {
+        const id = e.target.getAttribute('data-id');
+        const nombre = e.target.getAttribute('data-nombre');
+        document.getElementById('usuario_id').value = id;
+        document.getElementById('usuario_nombre').value = nombre;
+        // Cerrar modal
+        var modal = bootstrap.Modal.getInstance(document.getElementById('modalBuscarUsuario'));
+        modal.hide();
+      }
+    });
+  });
+
+
+    // Filtrar vehículos por placa, marca o modelo en el modal
+  document.addEventListener('DOMContentLoaded', function() {
+    const buscarVehiculoInput = document.getElementById('buscarVehiculoInput');
+    const tablaAutomoviles = document.getElementById('tablaAutomoviles').getElementsByTagName('tbody')[0];
+
+    buscarVehiculoInput.addEventListener('input', function() {
+      const filtro = this.value.trim().toLowerCase();
+      Array.from(tablaAutomoviles.rows).forEach(row => {
+        const placa = row.cells[1].textContent.trim().toLowerCase();
+        const marca = row.cells[2].textContent.trim().toLowerCase();
+        const modelo = row.cells[3].textContent.trim().toLowerCase();
+        row.style.display =
+          placa.includes(filtro) ||
+          marca.includes(filtro) ||
+          modelo.includes(filtro)
+          ? '' : 'none';
+      });
+    });
+  });
+
+
+
+
+  function validarOrden() {
+    const clienteId = document.getElementById('cliente_id').value.trim();
+    const usuarioId = document.getElementById('usuario_id').value.trim();
+    const automovilId = document.getElementById('automovil_id').value.trim();
+
+    if (!clienteId) {
+      alert('Debe seleccionar un cliente.');
+      return false;
+    }
+    if (!usuarioId) {
+      alert('Debe seleccionar un usuario.');
+      return false;
+    }
+    if (!automovilId) {
+      alert('Debe seleccionar al menos un vehículo.');
+      return false;
+    }
+    return true;
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const tablaAutomoviles = document.getElementById('tablaAutomoviles');
+    const inputAutomovilId = document.getElementById('automovil_id');
+    const automovilSeleccionado = document.getElementById('automovil_seleccionado');
+    const confirmarBtn = document.getElementById('confirmarAutomovil');
+
+    function actualizarPlacasSeleccionadas() {
+      const checks = tablaAutomoviles.querySelectorAll('.check-automovil:checked');
+      const ids = [];
+      const nombres = [];
+      checks.forEach(chk => {
+        ids.push(chk.value);
+        const placa = chk.getAttribute('data-placa');
+        const marca = chk.getAttribute('data-marca');
+        const modelo = chk.getAttribute('data-modelo');
+        nombres.push(`${placa} - ${marca} ${modelo}`);
+      });
+      inputAutomovilId.value = ids.join(',');
+      if (automovilSeleccionado) {
+        automovilSeleccionado.textContent = nombres.length > 0
+          ? 'Seleccionado: ' + nombres.join(' | ')
+          : '';
+      }
+    }
+
+    if (confirmarBtn) {
+      confirmarBtn.addEventListener('click', function() {
+        actualizarPlacasSeleccionadas();
+        var modal = bootstrap.Modal.getInstance(document.getElementById('modalSeleccionarAutomovil'));
+        modal.hide();
+      });
+    }
+
+    // También actualiza al abrir el modal, por si hay selección previa
+    document.getElementById('modalSeleccionarAutomovil').addEventListener('show.bs.modal', function() {
+      actualizarPlacasSeleccionadas();
+    });
+  });
+
+    // Al confirmar selección de vehículos envio a formulario servicio
+  document.getElementById('confirmarAutomovill').addEventListener('click', function() {
+    const checks = document.querySelectorAll('.check-automovil:checked');
+    window.vehiculosSeleccionados = [];
+    checks.forEach(chk => {
+      window.vehiculosSeleccionados.push({
+        id: chk.value,
+        placa: chk.getAttribute('data-placa'),
+        modelo: chk.getAttribute('data-modelo'),
+        marca: chk.getAttribute('data-marca')
+      });
+    });
+
+  });
+
+    //Rellenar tabla
+    document.addEventListener('DOMContentLoaded', function() {
+    const modalServiciosPorVehiculo = document.getElementById('modalServiciosPorVehiculo');
+    const tablaVehiculosServicios = document.getElementById('tablaVehiculosServicios').getElementsByTagName('tbody')[0];
+
+    modalServiciosPorVehiculo.addEventListener('show.bs.modal', function() {
+      tablaVehiculosServicios.innerHTML = '';
+      if (window.vehiculosSeleccionados && window.vehiculosSeleccionados.length > 0) {
+        window.vehiculosSeleccionados.forEach(vehiculo => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${vehiculo.placa} - ${vehiculo.modelo}</td>
+            <td>
+              <button type="button" class="btn btn-sm btn-success seleccionar-servicios-vehiculo" data-id="${vehiculo.id}">
+                Seleccionar servicios
+              </button>
+            </td>
+          `;
+          tablaVehiculosServicios.appendChild(tr);
+        });
+      } else {
+        tablaVehiculosServicios.innerHTML = `<tr><td colspan="2" class="text-center">No hay vehículos seleccionados.</td></tr>`;
+      }
+    });
+
+    // Aquí puedes agregar el evento para abrir el siguiente modal al hacer click en "Seleccionar servicios"
+    tablaVehiculosServicios.addEventListener('click', function(e) {
+      if (e.target.classList.contains('seleccionar-servicios-vehiculo')) {
+        const vehiculoId = e.target.getAttribute('data-id');
+        // Aquí llamas a la función para abrir el modal de servicios para ese vehículo
+        // abrirModalServiciosPorVehiculo(vehiculoId);
+      }
+    });
+  });
+
+
+    //input de servicio
+    document.addEventListener('DOMContentLoaded', function() {
+    const inputServicioId = document.getElementById('servicio_id');
+    const serviciosSeleccionadosDiv = document.getElementById('servicios_seleccionados');
+    const confirmarBtn = document.getElementById('confirmarServicios');
+    const tablaServicios = document.getElementById('tablaServicios');
+
+    function actualizarServiciosSeleccionados() {
+      const checks = tablaServicios.querySelectorAll('.check-servicio:checked');
+      const ids = [];
+      const resumen = [];
+      checks.forEach(chk => {
+        const id = chk.value;
+        const nombre = chk.getAttribute('data-nombre');
+        const precio = chk.getAttribute('data-precio');
+        ids.push(id);
+        resumen.push(`${nombre} ($${precio})`);
+      });
+      inputServicioId.value = ids.join(',');
+      serviciosSeleccionadosDiv.textContent = resumen.length > 0
+        ? 'Seleccionado: ' + resumen.join(' | ')
+        : '';
+    }
+
+    if (confirmarBtn) {
+      confirmarBtn.addEventListener('click', function() {
+        actualizarServiciosSeleccionados();
+        var modal = bootstrap.Modal.getInstance(document.getElementById('modalSeleccionarServicios'));
+        modal.hide();
+      });
+    }
+  });
+
+
+    // --- Calcular total automáticamente ---
+  document.addEventListener('DOMContentLoaded', function() {
+    const tablaServicios = document.getElementById('tablaServicios');
+    const descuentoSelect = document.getElementById('create_descuento');
+    const totalInput = document.getElementById('total');
+
+    function calcularTotal() {
+      // Sumar precios de servicios seleccionados
+      let suma = 0;
+      if (tablaServicios) {
+        const checks = tablaServicios.querySelectorAll('.check-servicio:checked');
+        checks.forEach(chk => {
+          const precio = parseFloat(chk.getAttribute('data-precio')) || 0;
+          suma += precio;
+        });
+      }
+      // Obtener descuento
+      const descuento = parseFloat(descuentoSelect.value) || 0;
+      // Aplicar descuento
+      const total = suma - (suma * descuento / 100);
+      totalInput.value = total.toFixed(2);
+    }
+
+    // Actualizar total al seleccionar/deseleccionar servicios
+    if (tablaServicios) {
+      tablaServicios.addEventListener('change', function(e) {
+        if (e.target.classList.contains('check-servicio')) {
+          calcularTotal();
+        }
+      });
+    }
+
+    // Actualizar total al cambiar descuento
+    if (descuentoSelect) {
+      descuentoSelect.addEventListener('change', calcularTotal);
+    }
+
+    // Al confirmar selección de servicios, recalcula
+    const confirmarServiciosBtn = document.getElementById('confirmarServicios');
+    if (confirmarServiciosBtn) {
+      confirmarServiciosBtn.addEventListener('click', calcularTotal);
+    }
+
+    // Inicializa el total al cargar
+    calcularTotal();
+  });
+</script>
+
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    function openEditModal(id, numero, cliente_id, usuario_id, automovil_id, total, estado_orden_id, estado) {
+      // Rellenar los campos del modal
+      document.getElementById('edit_id').value = id;
+      document.getElementById('edit_numero').value = numero;
+      document.getElementById('edit_cliente_id').value = cliente_id;
+      document.getElementById('edit_usuario_id').value = usuario_id;
+      document.getElementById('edit_automovil_id').value = automovil_id;
+      document.getElementById('edit_total').value = total;
+      document.getElementById('edit_estado_orden_id').value = estado_orden_id;
+      document.getElementById('edit_estado').value = estado;
+      document.getElementById('editForm').action = "/orden/update/" + id;
+      // Mostrar el modal Bootstrap
+      var modal = new bootstrap.Modal(document.getElementById('modalEdit'));
+      modal.show();
+    }
+</script>
+{% endblock %}
+
+<!-- Modal Buscar Cliente -->
+
+
