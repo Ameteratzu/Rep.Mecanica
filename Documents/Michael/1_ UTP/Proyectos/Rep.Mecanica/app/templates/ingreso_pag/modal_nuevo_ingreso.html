@@ -1,0 +1,374 @@
+<div class="modal fade" id="nuevoIngresoModal" tabindex="-1" aria-labelledby="nuevoIngresoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content text-dark">
+      <div class="modal-header">
+        <h5 class="modal-title text-center w-100" id="nuevoIngresoLabel">Registrar Ingresos</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+
+      <form action="{{ url_for('ingreso.nuevo_ingreso') }}" method="POST">
+        <div class="modal-body">
+          <!-- Datos del ingreso -->
+          <div class="row g-3 mb-3">
+            <div class="col-md-3">
+              <label for="referencia" class="form-label">Documento de Referencia</label>
+              <input type="text" name="referencia" id="referencia" class="form-control" required>
+            </div>
+            <div class="col-md-3 ms-auto">
+              <label for="guia" class="form-label">Guía</label>
+              <input type="text" name="guia" id="guia" class="form-control" required>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-3">
+              <label for="concepto" class="form-label">Concepto</label>
+              <input type="text" name="concepto" id="concepto" class="form-control" required>
+            </div>
+            <div class="col-md-3">
+              <label for="fecha" class="form-label">Fecha</label>
+              <input type="date" name="fecha" id="fecha" class="form-control" required>
+            </div>
+          </div>
+
+          <!-- Proveedor -->
+          <h6 class="modal-title mt-3">Proveedor de Procedencia</h6>
+          <div class="row g-2 mb-2">
+            <div class="col-md-3">
+              <button type="button" class="btn btn-secondary abrir-modal-secundario"
+                      data-modal-origen="nuevoIngresoModal"
+                      data-modal-destino="modalProveedor">
+                <i class="fas fa-search"></i> Seleccionar Proveedor
+              </button>
+            </div>
+          </div>
+
+          <div class="row g-2 mb-2">
+            <div class="col-md-4">
+              <label for="ruc" class="form-label">RUC</label>
+              <input type="text" name="ruc" id="ruc" class="form-control" required readonly>
+            </div>
+            <div class="col-md-4">
+              <label for="razon_social" class="form-label">Razón Social</label>
+              <input type="text" name="razon_social" id="razon_social" class="form-control" required readonly>
+            </div>
+            <div class="col-md-4">
+              <label for="telefono" class="form-label">Teléfono</label>
+              <input type="text" name="telefono" id="telefono" class="form-control" required readonly>
+            </div>
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col-md-6">
+              <label for="direccion" class="form-label">Dirección</label>
+              <input type="text" name="direccion" id="direccion" class="form-control" required readonly>
+            </div>
+          </div>
+
+          <input type="hidden" name="proveedor_id" id="proveedor_id">
+
+          <!-- Agregar productos -->
+          <h6 class="modal-title mt-4">Productos</h6>
+          <div class="row g-2 my-2">
+            <div class="col-md-2">
+              <button type="button" class="btn btn-secondary abrir-modal-secundario"
+                      data-modal-origen="nuevoIngresoModal"
+                      data-modal-destino="modalProducto">
+                <i class="fas fa-search"></i> Buscar Producto
+              </button>
+            </div>
+          </div>
+          <table class="table table-hover table-striped">
+            <thead class="table-dark">
+              <tr>
+                <th>Código</th>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Costo</th>
+                <th>Total</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="productosAgregados">
+              <!-- Productos agregados aquí -->
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="4" class="text-end fw-bold">Total General:</td>
+                <td id="totalGeneral" class="fw-bold">0.00</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+
+          <!-- Observación -->
+          <div class="row g-2 mt-3">
+            <div class="col-md-6">
+              <label for="observacion" class="form-label">Observación</label>
+              <input type="text" name="observacion" id="observacion" class="form-control" required>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          <button type="submit" class="btn btn-primary">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Seleccionar Proveedor -->
+<div class="modal fade" id="modalProveedor" tabindex="-1" aria-labelledby="modalProveedorLabel" aria-hidden="true"
+  data-modal-retorno="nuevoIngresoModal">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content text-dark">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalProveedorLabel">Seleccionar Proveedor</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-bordered table-hover">
+          <thead class="table-dark">
+            <tr>
+              <th>RUC</th>
+              <th>Razón Social</th>
+              <th>Teléfono</th>
+              <th>Dirección</th>
+              <th>Seleccionar</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for proveedor in proveedores %}
+            <tr>
+              <td>{{ proveedor.ruc }}</td>
+              <td>{{ proveedor.razon_social }}</td>
+              <td>{{ proveedor.telefono }}</td>
+              <td>{{ proveedor.direccion }}</td>
+              <td>
+                <button type="button" class="btn btn-sm btn-primary seleccionar-proveedor"
+                        data-id="{{ proveedor.id }}"
+                        data-ruc="{{ proveedor.ruc }}"
+                        data-razon_social="{{ proveedor.razon_social }}"
+                        data-telefono="{{ proveedor.telefono }}"
+                        data-direccion="{{ proveedor.direccion }}">
+                  Seleccionar
+                </button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Seleccionar Producto -->
+<div class="modal fade" id="modalProducto" tabindex="-1" aria-labelledby="modalProductoLabel" aria-hidden="true"
+     data-modal-retorno="nuevoIngresoModal">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content text-dark">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalProductoLabel">Seleccionar Producto</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <form class="d-flex" method="get" action="{{ url_for('producto.buscar_productos') }}">
+          <input type="text" name="search" class="form-control" value="{{ search or '' }}" placeholder="Código o Fecha">
+          <button class="btn btn-primary ms-2" type="submit">Buscar</button>
+        </form>
+        <!-- Inputs para cantidad y costo -->
+        <div class="row g-2">
+          <div class="col-md-3">
+            <label for="codigoProducto" class="form-label">Código</label>
+            <input type="text" id="codigoProducto" class="form-control" readonly>
+          </div>
+          <div class="col-md-4">
+            <label for="nombreProducto" class="form-label">Nombre</label>
+            <input type="text" id="nombreProducto" class="form-control" readonly>
+          </div>
+          <div class="col-md-2">
+            <label for="cantidadProducto" class="form-label">Cantidad</label>
+            <input type="number" id="cantidadProducto" class="form-control" min="1">
+          </div>
+          <div class="col-md-2">
+            <label for="costoProducto" class="form-label">Costo</label>
+            <input type="number" id="costoProducto" class="form-control" min="0" step="0.01">
+          </div>
+          <div class="col-md-1 d-flex align-items-end">
+            <button type="button" id="btnAgregarProducto" class="btn btn-success w-100">+</button>
+          </div>
+        </div>
+          
+        <table class="table table-bordered table-hover">
+          <thead class="table-dark">
+            <tr>
+              <th>Código</th>
+              <th>Nombre</th>
+              <th>Costo Actual</th>
+              <th>Seleccionar</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for producto in productos %}
+            <tr>
+              <td>{{ producto.codigo }}</td>
+              <td>{{ producto.nombre }}</td>
+              <td>{{ producto.costo }}</td>
+              <td>
+                <button type="button" class="btn btn-sm btn-primary seleccionar-producto"
+                        data-id="{{ producto.id }}"
+                        data-codigo="{{ producto.codigo }}"
+                        data-nombre="{{ producto.nombre }}">
+                  Seleccionar
+                </button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          
+        </table>
+        <input type="hidden" id="idProductoSeleccionado" value="">
+        <hr>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  let contadorProductos = 0;
+
+  // Funciones utilitarias
+  function cerrarModal(idModal) {
+    const modal = bootstrap.Modal.getInstance(document.getElementById(idModal));
+    if (modal) modal.hide();
+  }
+
+  function abrirModal(idModal) {
+    const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById(idModal));
+    modal.show();
+  }
+
+  function limpiarCamposProducto() {
+    ["codigoProducto", "nombreProducto", "cantidadProducto", "costoProducto"].forEach(id => {
+      document.getElementById(id).value = "";
+    });
+    document.getElementById("idProductoSeleccionado").value = "";
+  }
+
+  function seleccionarProveedor(data) {
+    document.getElementById("proveedor_id").value = data.id;
+    document.getElementById("ruc").value = data.ruc;
+    document.getElementById("razon_social").value = data.razon_social;
+    document.getElementById("telefono").value = data.telefono;
+    document.getElementById("direccion").value = data.direccion;
+  }
+
+  function seleccionarProducto(data) {
+    document.getElementById("idProductoSeleccionado").value = data.id;
+    document.getElementById("codigoProducto").value = data.codigo;
+    document.getElementById("nombreProducto").value = data.nombre;
+  }
+
+  function eliminarProducto(idFila) {
+    const fila = document.getElementById(idFila);
+    if (fila) {
+      fila.remove();
+      actualizarTotalGeneral();
+    }
+  }
+
+  function actualizarTotalGeneral() {
+    let total = 0;
+    document.querySelectorAll("#productosAgregados tr").forEach(tr => {
+      const totalFila = parseFloat(tr.cells[4]?.innerText || 0);
+      total += totalFila;
+    });
+    document.getElementById("totalGeneral").textContent = total.toFixed(2);
+  }
+
+  // Manejador de clicks global
+  document.addEventListener("click", function (e) {
+    if (e.target.classList.contains("seleccionar-proveedor")) {
+      seleccionarProveedor(e.target.dataset);
+      cerrarModal("modalProveedor");
+      setTimeout(() => abrirModal("nuevoIngresoModal"), 300);
+    }
+
+    if (e.target.classList.contains("seleccionar-producto")) {
+      seleccionarProducto(e.target.dataset);
+    }
+  });
+
+  // Botón "Agregar Producto"
+  document.getElementById("btnAgregarProducto").addEventListener("click", function () {
+    const codigo = document.getElementById("codigoProducto").value.trim();
+    const nombre = document.getElementById("nombreProducto").value.trim();
+    const cantidad = parseInt(document.getElementById("cantidadProducto").value);
+    const costo = parseFloat(document.getElementById("costoProducto").value);
+    const idProducto = document.getElementById("idProductoSeleccionado").value;
+
+    // Validaciones básicas
+    if (!codigo || !nombre || isNaN(cantidad) || isNaN(costo) || cantidad <= 0 || costo < 0) {
+      alert("Por favor, completa todos los campos del producto con valores válidos.");
+      return;
+    }
+
+    // Verifica si el producto ya fue agregado
+    const filas = document.querySelectorAll("#productosAgregados tr");
+    for (const fila of filas) {
+      if (fila.cells[0].innerText.trim() === codigo) {
+        alert("Este producto ya fue agregado.");
+        return;
+      }
+    }
+
+    const total = (cantidad * costo).toFixed(2);
+    const idFila = `filaProducto_${contadorProductos}`;
+
+    // Crear la fila con createElement para evitar riesgos de inyección
+    const tr = document.createElement("tr");
+    tr.id = idFila;
+    tr.innerHTML = `
+      <td>${codigo}<input type="hidden" name="productos[${contadorProductos}][codigo]" value="${codigo}"></td>
+      <td>${nombre}<input type="hidden" name="productos[${contadorProductos}][nombre]" value="${nombre}"></td>
+      <td>${cantidad}<input type="hidden" name="productos[${contadorProductos}][cantidad]" value="${cantidad}"></td>
+      <td>${costo.toFixed(2)}<input type="hidden" name="productos[${contadorProductos}][costo]" value="${costo.toFixed(2)}"></td>
+      <td>${total}</td>
+      <td>
+        <button type="button" class="btn btn-danger btn-sm" onclick="eliminarProducto('${idFila}')">Eliminar</button>
+      </td>
+      <input type="hidden" name="productos[${contadorProductos}][id]" value="${idProducto}">
+    `;
+
+    document.getElementById("productosAgregados").appendChild(tr);
+    contadorProductos++;
+
+    actualizarTotalGeneral();
+    limpiarCamposProducto();
+    cerrarModal("modalProducto");
+    setTimeout(() => abrirModal("nuevoIngresoModal"), 300);
+  });
+
+  // Control de abrir modal secundario desde botón con data-* 
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll('.abrir-modal-secundario').forEach(boton => {
+      boton.addEventListener('click', () => {
+        cerrarModal(boton.getAttribute('data-modal-origen'));
+        setTimeout(() => abrirModal(boton.getAttribute('data-modal-destino')), 300);
+      });
+    });
+
+    // Reabrir el modal de ingreso si se cierra proveedor o producto
+    ['modalProveedor', 'modalProducto'].forEach(idModal => {
+      document.getElementById(idModal).addEventListener('hidden.bs.modal', () => {
+        abrirModal('nuevoIngresoModal');
+      });
+    });
+  });
+</script>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Iniciar Sesión – TECMECH</title>
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+</head>
+<body>
+
+  <div class="login-container">
+    <div class="login-left">
+      <div>
+        <h3></h3>
+        <p></p>
+      </div>
+    </div>
+
+    <div class="login-right">
+      <div class="form-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for cat, msg in messages %}
+              <div class="alert alert-{{ cat }} alert-dismissible fade show" role="alert">
+                {{ msg }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <h1><strong>Bienvenidooo!</strong></h1>
+        <form method="post">
+          <div class="mb-3">
+            <label for="email" class="form-label">CORREO</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              class="form-control"
+              placeholder="example@gmail.com"
+              required
+              autofocus
+            />
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label">CONTRASEÑA</label>
+            <div class="input-group">
+              <input
+                id="password"
+                name="password"
+                type="password"
+                class="form-control"
+                placeholder="••••••••••"
+                required
+              />
+              <span
+                class="input-group-text btn-toggle-pw"
+                onclick="const pw = document.getElementById('password'); pw.type = pw.type === 'password' ? 'text' : 'password';"
+              >👁</span>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Iniciar Sesión  →</button>
+        </form>
+
+        <div class="extra-links">
+          <a href="#" data-bs-toggle="modal" data-bs-target="#forgotModal">
+            ¿Olvidaste tu contraseña?
+          </a><br/>
+          ¿No tienes cuenta?
+          <a href="{{ url_for('main.register') }}">Regístrate aquí</a>
+        </div>
+
+        {% if current_user.is_authenticated and is_admin() %}
+          <a href="{{ url_for('main.admin_panel') }}" class="btn btn-warning w-100 my-3">
+            Ir directamente al Panel de Administración
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Recuperación -->
+  <div
+    class="modal fade"
+    id="forgotModal"
+    tabindex="-1"
+    aria-labelledby="forgotModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content text-dark">
+        <div class="modal-header">
+          <h2 class="modal-title" id="forgotModalLabel"><strong>OLVIDASTE CONTRASEÑA</strong></h2>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Cerrar"
+          ></button>
+        </div>
+        <p class="txt-parrafo">Ingresa tu correo electrónico y te enviaremos las <br>
+            instrucciones para una nueva contraseña.</p>
+        <form method="post" action="{{ url_for('main.forgot') }}">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="forgot-email" class="form-label">INGRESAR CORREO</label>
+              <input
+                id="forgot-email"
+                name="email"
+                type="email"
+                class="form-control"
+                placeholder="example@gmail.com"
+                required
+              />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">RECUPERAR CONTRASEÑA →</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+  ></script>
+</body>
+</html>
