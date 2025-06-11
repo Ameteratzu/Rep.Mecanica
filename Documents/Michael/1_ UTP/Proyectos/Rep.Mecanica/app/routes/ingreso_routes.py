@@ -35,6 +35,7 @@ def list_ingresos():
     
     proveedores = Proveedor.query.filter_by(activo=True).all()
     productos = Producto.query.all()
+    guia_tentativa = Ingreso.generar_codigo_guia()
 
     return render_template(
         "ingreso_pag/ingreso_list.html",
@@ -43,7 +44,8 @@ def list_ingresos():
         search=search,
         estado=estado, 
         proveedores=proveedores,
-        productos=productos
+        productos=productos,
+        guia_tentativa=guia_tentativa
     )
 
 
@@ -51,9 +53,9 @@ def list_ingresos():
 @login_required
 def nuevo_ingreso():
     if request.method == "POST":
+        guia = Ingreso.generar_codigo_guia()
         # Datos del ingreso
-        referencia = request.form.get("referencia")
-        guia = request.form.get("guia")
+        referencia = request.form.get("referencia")        
         concepto = request.form.get("concepto")
         fecha = request.form.get("fecha")  # Considera convertir a date si es necesario
         observacion = request.form.get("observacion")
@@ -77,17 +79,24 @@ def nuevo_ingreso():
             p = productos_form[idx]
             if 'id' in p and 'cantidad' in p and 'costo' in p:
                 try:
+                    producto_id = int(p['id'])  # ✅ Definimos producto_id
                     cantidad = int(p['cantidad'])
                     costo = float(p['costo'])
                     total += cantidad * costo  # Calcular total
 
                     ingreso_producto = IngresoProducto(
-                        producto_id=int(p['id']),
+                        producto_id=producto_id,
                         cantidad=cantidad,
                         costo=costo,
                         total=cantidad * costo
                     )
                     productos.append(ingreso_producto)
+
+                    # ✅ Actualizamos el costo promedio y el inventario
+                    producto = Producto.query.get(producto_id)
+                    if producto:
+                        producto.actualizar_costo_promedio(cantidad_nueva=cantidad, costo_nuevo=costo)
+
                 except Exception as e:
                     flash(f"Error al procesar producto: {p}. Detalle: {e}", "danger")
                     return redirect(url_for("ingreso.nuevo_ingreso"))
@@ -120,54 +129,37 @@ def nuevo_ingreso():
             db.session.rollback()
             flash(f"Error al guardar ingreso: {e}", "danger")
             return redirect(url_for("ingreso.list_ingresos"))
-
+    else:    
     # GET: mostrar formulario con proveedores y productos para seleccionar
-    proveedores = Proveedor.query.all()
-    productos = Producto.query.all()
-    return redirect(url_for("ingreso.list_ingresos"))
+        guia_tentativa = Ingreso.generar_codigo_guia()
+        
+        proveedores = Proveedor.query.all()
+        productos = Producto.query.all()
+        return render_template("ingreso_pag/nuevo_ingreso.html", 
+                                guia=guia_tentativa, 
+                                proveedores=proveedores, 
+                                productos=productos)
 
-
-@ingreso_bp.route('/editar/<int:ingreso_id>', methods=['GET', 'POST'])
+@ingreso_bp.route('/eliminado_logico/<int:ingreso_id>', methods=['POST'])
 @login_required
-def editar_ingreso(ingreso_id):
+def eliminado_logico(ingreso_id):
     ingreso = Ingreso.query.get_or_404(ingreso_id)
-    proveedores = Proveedor.query.all()
-    productos = Producto.query.all()
 
-    if request.method == 'POST':
-        ingreso.referencia = request.form["referencia"]
-        ingreso.guia = request.form["guia"]
-        ingreso.concepto = request.form["concepto"]
-        ingreso.fecha = datetime.strptime(request.form["fecha"], "%Y-%m-%d").date()
-        ingreso.proveedor_id = request.form["proveedor_id"]
-        ingreso.observacion = request.form.get("observacion", "")
-
-        db.session.query(IngresoProducto).filter_by(ingresos_id=ingreso.id).delete()
-
-        total_general = 0
-        productos_ids = request.form.getlist("producto_id")
-        cantidades = request.form.getlist("cantidad")
-        costos = request.form.getlist("costo")
-
-        for prod_id, cant, cost in zip(productos_ids, cantidades, costos):
-            cantidad = int(cant)
-            costo = float(cost)
-            total = cantidad * costo
-            ingreso_producto = IngresoProducto(
-                ingresos_id=ingreso.id,
-                producto_id=prod_id,
-                cantidad=cantidad,
-                costo=costo,
-                total=total
-            )
-            total_general += total
-            db.session.add(ingreso_producto)
-
-        ingreso.total = total_general
-        db.session.commit()
+    if not ingreso.activo:
+        flash("El ingreso ya se encuentra anulado, no se puede cambiar.", "warning")
         return redirect(url_for('ingreso.list_ingresos'))
 
-    return render_template("ingreso_pag/ingreso_edit.html", ingreso=ingreso, proveedores=proveedores, productos=productos)
+    ingreso.activo = False  # Anular el ingreso (cambio lógico)
+
+    try:
+        db.session.commit()
+        flash("El ingreso ha sido anulado correctamente.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"No se pudo anular el ingreso: {e}", "danger")
+
+    return redirect(url_for('ingreso.list_ingresos'))
+
 
 @ingreso_bp.route('/eliminar/<int:ingreso_id>', methods=['POST'])
 @login_required

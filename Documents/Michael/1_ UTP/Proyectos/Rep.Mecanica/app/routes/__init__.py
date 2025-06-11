@@ -6,6 +6,7 @@ from app.routes.proveedor_routes import proveedor_bp
 from app.routes.orden_routes import orden_bpp
 from app.routes.automovil_routes import automovil_bpp
 from app.routes.ingreso_routes import ingreso_bp
+from app.routes.inventario_routes import inventario_bp
 # importa los demás blueprints que tengas
 
 all_blueprints = [
@@ -15,7 +16,8 @@ all_blueprints = [
     proveedor_bp,
     orden_bpp,
     automovil_bpp,
-    ingreso_bp
+    ingreso_bp,
+    inventario_bp
 ]
 
 def register_blueprints(app):

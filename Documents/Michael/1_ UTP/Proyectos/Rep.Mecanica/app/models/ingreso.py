@@ -20,3 +20,15 @@ class Ingreso(db.Model):
 
     def __repr__(self):
         return f"<Ingreso {self.id} - {self.referencia}>"
+
+    @classmethod
+    def generar_codigo_guia(cls):
+        ultimo_ingreso = Ingreso.query.filter(Ingreso.guia.like('I001-%')).order_by(Ingreso.id.desc()).first()
+        if ultimo_ingreso and ultimo_ingreso.guia:
+            ultimo_numero = int(ultimo_ingreso.guia.split('-')[1])
+        else:
+            ultimo_numero = 0
+
+        nuevo_numero = ultimo_numero + 1
+        codigo_guia = f"I001-{nuevo_numero:08d}"
+        return codigo_guia

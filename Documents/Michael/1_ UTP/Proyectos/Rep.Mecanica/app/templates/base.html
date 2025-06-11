@@ -83,14 +83,20 @@
           Ordenes
         </a>
       </li>
-       <li class="nav-item">
+      <li class="nav-item">
         <a href="{{ url_for('ingreso.list_ingresos') }}"
            class="nav-link {% if request.endpoint == 'ingreso.list_ingresos' %}active{% endif %}">
           Ingresos
         </a>
       </li>
+      <li class="nav-item">
+        <a href="{{ url_for('inventario.listar_inventario') }}"
+           class="nav-link {% if request.endpoint == 'inventario.listar_inventario' %}active{% endif %}">
+          Inventario
+        </a>
+      </li>
     </ul>
-
+    
     <!-- Botón fijo abajo a la izquierda -->
     <div class="sidebar-logout-container">
       <a href="{{ url_for('main.logout') }}" class="btn-logout-sidebar">Cerrar sesión</a>

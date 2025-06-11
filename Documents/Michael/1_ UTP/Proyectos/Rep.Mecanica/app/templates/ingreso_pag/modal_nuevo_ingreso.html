@@ -16,7 +16,7 @@
             </div>
             <div class="col-md-3 ms-auto">
               <label for="guia" class="form-label">Guía</label>
-              <input type="text" name="guia" id="guia" class="form-control" required>
+              <input type="text" class="form-control" id="guia" name="guia" value="{{ guia_tentativa }}" readonly>
             </div>
           </div>
 
@@ -130,7 +130,9 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
       <div class="modal-body">
-        <table class="table table-bordered table-hover">
+        <label for="filtroProveedor" class="form-label">Buscar proveedor</label>
+        <input type="text" id="filtroProveedor" class="form-control mb-3" placeholder="Buscar por RUC o Razón Social">
+        <table class="table table-bordered table-hover" id="tablaProveedores">
           <thead class="table-dark">
             <tr>
               <th>RUC</th>
@@ -176,11 +178,9 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
       <div class="modal-body">
-        <form class="d-flex" method="get" action="{{ url_for('producto.buscar_productos') }}">
-          <input type="text" name="search" class="form-control" value="{{ search or '' }}" placeholder="Código o Fecha">
-          <button class="btn btn-primary ms-2" type="submit">Buscar</button>
-        </form>
-        <!-- Inputs para cantidad y costo -->
+        <label for="filtroProducto" class="form-label">Buscar producto</label>
+        <input type="text" id="buscarProductoInput" class="form-control mb-3" placeholder="Buscar por código, nombre o marca..">
+                <!-- Inputs para cantidad y costo -->
         <div class="row g-2">
           <div class="col-md-3">
             <label for="codigoProducto" class="form-label">Código</label>
@@ -208,6 +208,7 @@
             <tr>
               <th>Código</th>
               <th>Nombre</th>
+              <th>Marca</th>
               <th>Costo Actual</th>
               <th>Seleccionar</th>
             </tr>
@@ -217,6 +218,7 @@
             <tr>
               <td>{{ producto.codigo }}</td>
               <td>{{ producto.nombre }}</td>
+              <td>{{ producto.marca }}</td>
               <td>{{ producto.costo }}</td>
               <td>
                 <button type="button" class="btn btn-sm btn-primary seleccionar-producto"
@@ -304,6 +306,43 @@
       seleccionarProducto(e.target.dataset);
     }
   });
+  // Filtrado simple de la tabla de proveedores por RUC o Razón Social
+  document.getElementById('filtroProveedor').addEventListener('input', function () {
+    const filtro = this.value.toLowerCase();
+    const tabla = document.getElementById('tablaProveedores').getElementsByTagName('tbody')[0];
+    const filas = tabla.getElementsByTagName('tr');
+
+    for (let fila of filas) {
+      const ruc = fila.cells[0].textContent.toLowerCase();
+      const razonSocial = fila.cells[1].textContent.toLowerCase();
+
+      if (ruc.includes(filtro) || razonSocial.includes(filtro)) {
+        fila.style.display = '';
+      } else {
+        fila.style.display = 'none';
+      }
+    }
+  });
+  // Filtrar productos por código, nombre o marca
+  document.getElementById('buscarProductoInput').addEventListener('input', function () {
+    const filtro = this.value.toLowerCase();
+    const tabla = document.querySelector('#modalProducto table tbody');
+    const filas = tabla.getElementsByTagName('tr');
+
+    for (let fila of filas) {
+      const codigo = fila.cells[0].textContent.toLowerCase();
+      const nombre = fila.cells[1].textContent.toLowerCase();
+      const marca = fila.cells[2].textContent.toLowerCase();
+
+      if (codigo.includes(filtro) || nombre.includes(filtro) || marca.includes(filtro)) {
+        fila.style.display = '';
+      } else {
+        fila.style.display = 'none';
+      }
+    }
+  });
+
+
 
   // Botón "Agregar Producto"
   document.getElementById("btnAgregarProducto").addEventListener("click", function () {

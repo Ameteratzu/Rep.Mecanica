@@ -14,6 +14,7 @@ from .proveedor     import Proveedor
 from .producto_proveedor import ProductoProveedor
 from .ingreso import Ingreso
 from .ingreso_producto import IngresoProducto
+from .inventario import Inventario
 
 __all__ = [
     "db",
@@ -30,5 +31,6 @@ __all__ = [
     "Proveedor",
     "ProductoProveedor",
     "Ingreso",
-    "IngresoProducto"
+    "IngresoProducto",
+    "Inventario"
 ]

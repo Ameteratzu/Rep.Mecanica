@@ -23,6 +23,28 @@ class Producto(db.Model):
     
     # Relación con Ingreso (muchos a muchos)
     ingresos_productos = db.relationship("IngresoProducto", back_populates="producto", cascade='all, delete-orphan')
+    
+    def actualizar_costo_promedio(self, cantidad_nueva, costo_nuevo):
+        from app.models.inventario import Inventario
+        
+        inventario = Inventario.query.filter_by(producto_id=self.id).first()
+        if inventario:
+            stock_actual = inventario.total_ingresos - inventario.total_egresos
+            costo_actual = float(self.costo or 0)
+
+            # Calcular el nuevo costo ponderado
+            if (stock_actual + cantidad_nueva) > 0:
+                nuevo_costo = (
+                    (costo_actual * stock_actual) + (costo_nuevo * cantidad_nueva)
+                ) / (stock_actual + cantidad_nueva)
+            else:
+                nuevo_costo = costo_nuevo  # Si no hay stock previo
+
+            # Actualizar inventario y costo
+            inventario.total_ingresos += cantidad_nueva
+            self.costo = nuevo_costo
+
+            db.session.commit()
 
     def __repr__(self):
         return f"<Producto {self.id} – {self.nombre}>"

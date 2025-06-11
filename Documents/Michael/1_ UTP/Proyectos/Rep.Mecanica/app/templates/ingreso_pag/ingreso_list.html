@@ -51,10 +51,9 @@
       <td>{{ ingreso.fecha }}</td>
       <td>{{ ingreso.proveedor.razon_social }}</td>
       <td>{{ ingreso.total }}</td>
-      <td>{{ 'Activo' if ingreso.activo else 'Inactivo' }}</td>
-      <td>
-        <a href="{{ url_for('ingreso.editar_ingreso', ingreso_id=ingreso.id) }}" class="btn btn-sm btn-warning">Editar</a>
-        <form action="{{ url_for('ingreso.eliminar_ingreso', ingreso_id=ingreso.id) }}" method="POST" style="display:inline" onsubmit="return confirmarEliminacion(event)">
+      <td>{{ 'Activo' if ingreso.activo else 'Anulado' }}</td>
+      <td>        
+        <form action="{{ url_for('ingreso.eliminado_logico', ingreso_id=ingreso.id) }}" method="POST" style="display:inline" onsubmit="return confirmarEliminacion(event)">
           <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
         </form>
       </td>
@@ -98,24 +97,6 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.seleccionar-proveedor').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.getElementById('proveedor_id').value = btn.dataset.id;
-        document.getElementById('ruc').value = btn.dataset.ruc;
-        document.getElementById('razon_social').value = btn.dataset.razon_social;
-        document.getElementById('telefono').value = btn.dataset.telefono;
-        document.getElementById('direccion').value = btn.dataset.direccion;
-        
-        // Cerrar el modal de proveedores
-        const modal = bootstrap.Modal.getInstance(document.getElementById('modalProveedor'));
-        modal.hide();
-
-      });
-    });
-  });
-</script>
 <script>
   setTimeout(() => {
     document.querySelectorAll('.alert').forEach(alert => {
