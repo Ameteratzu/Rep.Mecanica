@@ -52,7 +52,18 @@ def gestion_permisos():
         abort(403)
     roles = Rol.query.filter_by(activo=True).all()
     permisos = Permiso.query.all()
-    return render_template('rol_pag/gestion_permisos.html', roles=roles, permisos=permisos)
+    # SERIALIZAR para JS
+    roles_json = [
+        {"id": r.id, "rol": r.rol, "activo": r.activo} for r in roles
+    ]
+    return render_template(
+        'rol_pag/gestion_permisos.html',
+        roles=roles,
+        roles_json=roles_json,
+        permisos=permisos
+    )
+
+
 
 @rol_bp.route('/permisos/data', methods=['GET'])
 @login_required

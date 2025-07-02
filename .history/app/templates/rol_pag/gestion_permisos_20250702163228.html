@@ -40,7 +40,7 @@
 {% block scripts %}
 <script>
 let rolActual = {{ roles[0].id if roles else 0 }};
-const rolesData = {{ roles|tojson|safe }};
+const rolesData = {{ roles_json|tojson|safe }};
 
 const rolNombreSpan = document.getElementById("rol-nombre");
 const form = document.getElementById("form-permisos");
