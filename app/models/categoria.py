@@ -1,5 +1,3 @@
-# app/models/categoria.py
-
 from app.extensions import db
 
 class Categoria(db.Model):

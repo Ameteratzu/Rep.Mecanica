@@ -1,0 +1,280 @@
+<!-- Modal Nueva Cotización -->
+<div class="modal fade" id="nuevaCotizacionModal" tabindex="-1" aria-labelledby="nuevaCotizacionLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content text-dark">
+      <div class="modal-header">
+        <h5 class="modal-title w-100 text-center" id="nuevaCotizacionLabel">Registrar Cotización</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+
+      <form action="{{ url_for('cotizacion.nueva_cotizacion') }}" method="POST">
+        <div class="modal-body">
+          <!-- Datos principales -->
+          <div class="row g-3 mb-3">
+            <div class="col-md-3">
+              <label for="codigo" class="form-label">N° Cotización</label>
+              <input type="text" class="form-control" id="codigo" name="codigo" value="{{ codigo_tentativo }}" readonly>
+            </div>
+            <div class="col-md-3">
+              <label for="fecha" class="form-label">Fecha</label>
+              <input type="date" class="form-control fecha-hoy" id="fecha" name="fecha" readonly>
+            </div>
+            <div class="col-md-3">
+              <label for="fecha_vencimiento" class="form-label">Fecha de Vencimiento</label>
+              <input type="date" class="form-control" name="fecha_vencimiento" id="fecha_vencimiento" required>
+            </div>
+            <div class="col-md-3">
+              <label for="estado_id" class="form-label">Estado</label>
+              <select class="form-select" name="estado_id" required>
+                {% for estado in estados %}
+                  <option value="{{ estado.id }}" {% if estado.nombre == 'Pendiente' %}selected{% endif %}>
+                    {{ estado.nombre }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <!-- Cliente -->
+          <h6 class="mt-3">Cliente</h6>
+          <div class="row g-2 mb-2">
+            <div class="col-md-3">
+              <button type="button" class="btn btn-secondary w-100 btnBuscarCliente"
+                data-cliente-id="cliente_id"
+                data-cliente-dni="dni"
+                data-cliente-nombre="nombre_cliente"
+                data-cliente-celular="celular">
+                Seleccionar Cliente
+              </button>
+            </div>
+          </div>
+          <div class="row g-2 mb-2">
+            <div class="col-md-3">
+              <label for="dni" class="form-label">DNI / RUC</label>
+              <input type="text" id="dni" class="form-control" readonly>
+            </div>
+            <div class="col-md-6">
+              <label for="nombre_cliente" class="form-label">Nombre Completo</label>
+              <input type="text" id="nombre_cliente" class="form-control" readonly>
+            </div>
+            <div class="col-md-3">
+              <label for="celular" class="form-label">Celular</label>
+              <input type="text" id="celular" class="form-control" readonly>
+            </div>
+          </div>
+          <input type="hidden" name="cliente_id" id="cliente_id">
+
+          <!-- Automóvil -->
+          <h6 class="mt-3">Automóvil</h6>
+          <div class="row g-2 mb-2">
+            <div class="col-md-3">
+              <button type="button" class="btn btn-secondary w-100 btnBuscarAuto"
+                data-auto-id="automovil_id"
+                data-auto-placa="placa_auto"
+                data-auto-detalle="detalle_auto">
+                Seleccionar Automóvil
+              </button>
+            </div>
+          </div>
+          <div class="row g-2 mb-2">
+            <div class="col-md-3">
+              <label for="placa_auto" class="form-label">Placa</label>
+              <input type="text" id="placa_auto" class="form-control" readonly>
+            </div>
+            <div class="col-md-9">
+              <label for="detalle_auto" class="form-label">Detalle</label>
+              <input type="text" id="detalle_auto" class="form-control" readonly>
+            </div>
+          </div>
+          <input type="hidden" name="automovil_id" id="automovil_id">
+
+
+          <!-- Diagnóstico y observaciones -->
+          <div class="row g-2 mb-3">
+            <div class="col-md-12">
+              <label for="diagnostico" class="form-label">Diagnóstico</label>
+              <textarea name="diagnostico" id="diagnostico" class="form-control" rows="2"></textarea>
+            </div>
+          </div>
+
+          <!-- Productos -->
+          <h6 class="mt-3">Agregar Productos</h6>
+          <div class="row g-2 my-2">
+            <div class="col-md-2">
+              <button type="button" class="btn btn-secondary abrir-modal-secundario"
+                      data-modal-origen="nuevaCotizacionModal"
+                      data-modal-destino="modalProducto">
+                <i class="fas fa-search"></i> Buscar Producto
+              </button>
+            </div>
+          </div>
+          <div class="row g-2 mb-3">
+            <div class="col-md-2">
+              <label class="form-label">Código</label>
+              <input type="text" id="codigoProducto" class="form-control" readonly>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Nombre</label>
+              <input type="text" id="nombreProducto" class="form-control" readonly>
+            </div>            
+            <div class="col-md-2">
+              <label class="form-label">Precio</label>
+              <input type="number" id="precioProducto" class="form-control" step="0.01">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Descuento (%)</label>
+              <input type="number" id="descuentoProducto" class="form-control" value="0" min="0" max="100" step="0.01">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Cantidad</label>
+              <input type="number" id="cantidadProducto" class="form-control">
+            </div>
+            <div class="col-md-1 d-flex align-items-end">
+              <button type="button" class="btn btn-success w-100" id="btnAgregarProducto">+</button>
+            </div>
+          </div>
+          <table class="table table-hover">
+            <thead class="table-dark">
+              <tr>
+                <th>Código</th>
+                <th>Producto</th>
+                <th>Precio</th>
+                <th>Descuento</th>
+                <th>Cantidad</th>                
+                <th>Total</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="productosAgregados">
+              <!-- JS renderizado -->
+            </tbody>
+          </table>
+          <div class="row mb-3">
+            <div class="col-md-3 offset-md-9">
+              <label class="form-label fw-bold">Total Productos (S/):</label>
+              <input type="text" class="form-control fw-bold text-end" id="totalProductos" readonly value="0.00">
+            </div>
+          </div>
+
+          <!-- Servicios -->
+          <h6 class="mt-3">Agregar Servicios</h6>
+          <div class="row g-2 mb-2">
+            <div class="col-md-2">
+              <button type="button" class="btn btn-secondary abrir-modal-secundario"
+                      data-modal-origen="nuevaCotizacionModal"
+                      data-modal-destino="modalServicio">
+                <i class="fas fa-search"></i> Buscar Servicio
+              </button>
+            </div>
+          </div>
+          <div class="row g-2 mb-3">
+            <div class="col-md-2">
+              <label class="form-label">Código</label>
+              <input type="text" id="codigoServicio" class="form-control" readonly>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Servicio</label>
+              <input type="text" id="nombreServicio" class="form-control" readonly>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Precio</label>
+              <input type="number" id="precioServicio" class="form-control" readonly>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Descuento (%)</label>
+              <input type="number" id="descuentoServicio" class="form-control" class="form-control" value="0" min="0" max="100" step="0.01">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Cantidad</label>
+              <input type="number" id="cantidadServicio" class="form-control" min="1" value="1">
+            </div>
+            <div class="col-md-1 d-flex align-items-end">
+              <button type="button" class="btn btn-success w-100" id="btnAgregarServicio">+</button>
+            </div>
+          </div>
+
+          <table class="table table-hover">
+            <thead class="table-dark">
+              <tr>
+                <th>Codigo</th>
+                <th>Servicio</th>
+                <th>Precio</th>
+                <th>Descuento</th>
+                <th>Cantidad</th>
+                <th>Total</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="serviciosAgregados">
+              <!-- JS renderizado -->
+            </tbody>
+          </table>
+
+          <div class="row mb-3">
+            <div class="col-md-3 offset-md-9">
+              <label class="form-label fw-bold">Total Servicios (S/):</label>
+              <input type="text" class="form-control fw-bold text-end" id="totalServicios" readonly value="0.00">
+            </div>
+          </div>
+
+
+          <!-- Totales -->
+          <div class="row g-2 mt-3">
+            <div class="col-md-3 offset-md-9">
+              <label for="descuento" class="form-label">Descuento (%)</label>
+              <input type="number" name="descuento" id="descuento" class="form-control" value="0" min="0" max="100" step="0.01">
+            </div>
+            <div class="row mb-3">
+            <!-- Subtotal -->
+              <div class="col-md-3 offset-md-9 mt-2">
+                <label class="form-label">Subtotal (S/)</label>
+                <input type="text" class="form-control text-end" id="subtotal" readonly value="0.00">
+              </div>
+
+              <!-- Descuento en monto -->
+              <div class="col-md-3 offset-md-9 mt-2">
+                <label class="form-label">Descuento (S/)</label>
+                <input type="text" class="form-control text-end" id="descuento_monto" readonly value="0.00">
+              </div>
+
+              <!-- Total sin IGV -->
+              <div class="col-md-3 offset-md-9 mt-2">
+                <label class="form-label">Total sin IGV (S/)</label>
+                <input type="text" class="form-control text-end" id="total_sin_igv" readonly value="0.00">
+              </div>
+
+              <!-- IGV -->
+              <div class="col-md-3 offset-md-9 mt-2">
+                <label class="form-label">IGV (18%)</label>
+                <input type="text" class="form-control text-end" id="igv" readonly value="0.00">
+              </div>
+
+              <!-- Total General -->
+              <div class="col-md-3 offset-md-9 mt-2 mb-2">
+                <label class="form-label fw-bold">Total General (S/)</label>
+                <input type="text" class="form-control fw-bold text-end text-success" id="totalCotizacion" readonly value="0.00">
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Observaciones -->
+          <div class="row g-2 mt-3">
+            <div class="col-md-12">
+              <label for="observaciones" class="form-label">Observaciones</label>
+              <textarea name="observaciones" id="observaciones" class="form-control" rows="2"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-success" id="btnRegistrarYFacturar">
+            Registrar y Pagar
+          </button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Registrar Cotización</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

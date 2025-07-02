@@ -1,5 +1,3 @@
-# app/models/cliente.py
-
 from app.extensions import db
 
 class Cliente(db.Model):
@@ -20,7 +18,9 @@ class Cliente(db.Model):
 
     ubigeo         = db.relationship("Ubigeo", back_populates="clientes")
     automoviles    = db.relationship("Automovil", back_populates="cliente")
-    ordenes        = db.relationship("Orden", back_populates="cliente")
+    ventas = db.relationship('Venta', back_populates='cliente', cascade='all, delete-orphan')
+
+
 
     def __repr__(self):
         return f"<Cliente {self.id} – {self.nombres} {self.apellidos}>"

@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container-fluid mt-2">
+  <div class="card">
+    <div class="card-body">
+      <h4>{{ servicio.id and 'Editar orden de Servicio' or 'Crear orden de Servicio' }}</h4>
+
+      <form method="POST">
+        <div class="row">
+          <div class="col-md-6">
+            <label>Código</label>
+            <input name="codigo" value="{{ servicio.codigo or '' }}" class="form-control" >
+          </div>
+          <div class="col-md-6">
+            <label>Nombre</label>
+            <input name="nombre" value="{{ servicio.nombre or '' }}" class="form-control" >
+          </div>
+          <div class="col-12">
+            <label>Descripción</label>
+            <textarea name="descripcion" class="form-control" >{{ servicio.descripcion or '' }}</textarea>
+          </div>
+
+          <div class="col-md-6">
+            <label>Descuento %</label>
+            <input name="descuento" type="number" step="0.01" value="{{ servicio.descuento or 0 }}" class="form-control"
+              >
+          </div>
+          <div class="col-md-6">
+            <label>Estado</label>
+            <select name="activo" class="form-select">
+              <option value="1" {% if servicio.activo %}selected{% endif %}>Activo</option>
+              <option value="0" {% if not servicio.activo %}selected{% endif %}>Inactivo</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label>Precio</label>
+            <input name="precio" type="number" step="0.01" value="{{ servicio.precio or 0 }}" class="form-control"
+              >
+          </div>
+        </div>
+        <br>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="{{ url_for('servicio.list_servicios') }}" class="btn btn-secondary">Cancelar</a>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

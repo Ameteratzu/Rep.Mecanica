@@ -1,5 +1,3 @@
-# app/models/ubigeo.py
-
 from app.extensions import db
 
 class Ubigeo(db.Model):
@@ -17,6 +15,8 @@ class Ubigeo(db.Model):
         back_populates="ubigeo",
         lazy=True
     )
+    
+    proveedores = db.relationship('Proveedor', back_populates='ubigeo')
 
     def __init__(self, codigo, departamento, provincia, distrito):
         self.codigo       = codigo

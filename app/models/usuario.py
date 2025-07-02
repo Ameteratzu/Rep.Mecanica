@@ -11,8 +11,10 @@ class User(UserMixin, db.Model):
     active = db.Column(db.Boolean, default=True)
     last_login = db.Column(db.DateTime)
     persona_id = db.Column(db.Integer, db.ForeignKey("personas.id"), nullable=False)
+    rol_id = db.Column(db.Integer, db.ForeignKey("roles.id"), nullable=False, default=1)
 
-    ordenes = db.relationship('Orden', back_populates='usuario', lazy=True)
+    ventas = db.relationship('Venta', back_populates='usuario', cascade='all, delete-orphan')
+    rol = db.relationship('Rol', backref='usuarios')
 
     def set_password(self, pw):
         self.password_hash = generate_password_hash(pw)

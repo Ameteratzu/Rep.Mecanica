@@ -1,0 +1,69 @@
+<div class="modal fade" id="editarProductoModal{{ producto.id }}" tabindex="-1" aria-labelledby="editarProductoLabel{{ producto.id }}" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content text-dark">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editarProductoLabel{{ producto.id }}">Editar Producto</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <form method="POST" action="{{ url_for('producto.edit_product', product_id=producto.id) }}">
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-6">
+              <label>Código</label>
+              <input name="codigo" value="{{ producto.codigo }}" class="form-control" required>
+            </div>
+
+            <div class="col-md-6">
+              <label>Categoría</label>
+              <select name="categoria_id" class="form-control" required>
+                {% for c in categorias %}
+                  <option value="{{ c.id }}" {% if producto.categoria_id == c.id %}selected{% endif %}>{{ c.categoria }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label>Nombre</label>
+              <input name="nombre" value="{{ producto.nombre }}" class="form-control" required>
+            </div>
+
+            <div class="col-md-6">
+              <label>Marca</label>
+              <input name="marca" value="{{ producto.marca }}" class="form-control">
+            </div>
+
+            <div class="col-md-6">
+              <label>Costo</label>
+              <input name="costo" value="{{ producto.costo }}" type="number" step="0.01" class="form-control" required>
+            </div>
+
+            <div class="col-md-6">
+              <label>Precio</label>
+              <input name="precio" value="{{ producto.precio }}" type="number" step="0.01" class="form-control" required>
+            </div>
+
+            <div class="col-md-6">
+              <label>Stock mínimo</label>
+              <input name="stock_minimo" value="{{ producto.stock_minimo }}" type="number" step="0.01" class="form-control" required>
+            </div>
+
+            <div class="col-md-6">
+              <label>Estado</label>
+              <select name="activo" class="form-control" required>
+                <option value="1" {% if producto.activo %}selected{% endif %}>Activo</option>
+                <option value="0" {% if not producto.activo %}selected{% endif %}>Inactivo</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Guardar</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>

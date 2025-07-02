@@ -1,0 +1,33 @@
+<div class="modal fade" id="modal_buscar_auto" tabindex="-1" aria-labelledby="buscarAutoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="buscarAutoLabel">Buscar Automóvil</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="input-group mb-3">
+          <input type="text" id="busquedaAuto" class="form-control" placeholder="Buscar por placa, marca o modelo...">
+        </div>
+
+        <table class="table table-bordered table-hover">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Placa</th>
+              <th>Marca</th>
+              <th>Modelo</th>
+              <th>Seleccionar</th>
+            </tr>
+          </thead>
+          <tbody id="tablaAutos">
+            <!-- JS llenará esta tabla -->
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>

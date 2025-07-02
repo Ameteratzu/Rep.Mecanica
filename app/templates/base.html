@@ -1,217 +1,156 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>{% block title %}TECMECH{% endblock %}</title>
-    <!-- Sheetjs -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- Bootstrap CSS -->
-    <link
-            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
-            rel="stylesheet"
-    />
-    <!-- Scripts js - indices -->
-    <script src="{{ url_for('static', filename='js/orden/indice.js') }}"></script>
-
-
-    <!-- FontAwesome para iconos -->
-    <link
-            rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-            integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0"
-            crossorigin="anonymous"
-            referrerpolicy="no-referrer"/>
-
-    <style>
-
-        .sidebar .nav-link:hover:not(.active):not(.disabled) {
-          background: #f8f9fa;
-          color: #194989 !important;
-        }
-        .sidebar .nav-link.disabled {
-          color: #b1b7be !important;
-          background: none !important;
-          cursor: default;
-          pointer-events: none;
-          font-weight: normal;
-        }
-        .sidebar-logout-container {
-        margin-top: auto;
-        display: flex;
-        justify-content: center;
-        padding-bottom: 70px;
-        }
-
-        .btn-logout-sidebar {
-          background: #dc3545;
-          color: white;
-          border: 2px solid #fff;
-          border-radius: 0.35rem;
-          padding: 0.4rem 1.8rem;
-          font-size: 1.08rem;
-          font-weight: 500;
-          box-shadow: none;
-          outline: none;
-          transition: all 0.2s;
-          text-align: center;
-          min-width: 130px;     /* ancho mínimo, puedes ajustar a tu gusto */
-          max-width: 130px;     /* ancho máximo, para que nunca se expanda de más */
-          width: 85%;           /* será menos ancho que el sidebar */
-        }
-
-          .btn-logout-sidebar:hover, .btn-logout-sidebar:focus {
-          background: #fff;
-          color: #dc3545;
-          border-color: #dc3545;
-          text-decoration: none;
-          box-shadow: 0 2px 12px rgba(220,53,69,0.12);
-          }
-          /* ▼ HEADER FIJO */
-          .main-header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 60px;
-            background-color: #194989;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
-            z-index: 1000;
-          }
-          .main-header .logo { font-size: 1.5rem; font-weight: bold; }
-          .main-header .user-info { display: flex; align-items: center; gap: 10px; }
-          .main-header .user-info i { font-size: 1.5rem; }
-
-          /* ▼ SIDEBAR FIJO */
-          .sidebar {
-            display: flex;
-            flex-direction: column;
-            position: fixed;
-            height: 100vh;
-            top: 60px;         /* justo debajo del header */
-            bottom: 0;
-            left: 0;
-            width: 200px;
-            background-color: #194989;
-            padding-top: 20px;
-            overflow-y: auto;
-          }
-          .sidebar .nav-link {
-            color: #adb5bd;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
-          }
-          .sidebar .nav-link:hover {
-            background-color: white;
-            color: #000 !important;
-          }
-          .sidebar .nav-link.active {
-            background-color: white;
-            color: #194989 !important;
-            font-weight: bold;
-          }
-
-          /* ▼ CONTENIDO PRINCIPAL */
-          .main-content {
-            margin-top: 60px;   /* altura del header */
-            margin-left: 200px; /* ancho del sidebar */
-            padding: 2.5em;
-            background-color: white;
-            min-height: calc(100vh - 60px);
-          }
-
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}TECMECH{% endblock %}</title>
+  <!-- Sheetjs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <!-- FontAwesome para iconos -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+  <!-- Tu CSS externo -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-
 <body>
-
-<!-- HEADER -->
-<header class="main-header">
+  <!-- HEADER -->
+  <header class="main-header">
     <div class="logo">TECMECH</div>
     <div class="user-info d-flex align-items-center gap-2">
+      {% if current_user.is_authenticated %}
         <strong class="ms-2">{{ current_user.email }}</strong>
         <img src="https://ui-avatars.com/api/?name={{ current_user.persona.nombres|default(current_user.email)|urlencode }}&background=0D8ABC&color=fff&size=40"
              alt="Avatar"
              class="rounded-circle"
              style="width:38px;height:38px;">
+      {% else %}
+        <strong class="ms-2">Invitado</strong>
+        <img src="https://ui-avatars.com/api/?name=Invitado&background=0D8ABC&color=fff&size=40"
+             alt="Avatar"
+             class="rounded-circle"
+             style="width:38px;height:38px;">
+      {% endif %}
     </div>
-</header>
+  </header>
 
-
-<!-- SIDEBAR -->
-<nav class="sidebar">
+  <!-- SIDEBAR -->
+  {% if current_user.is_authenticated %}
+  <nav class="sidebar">
     <h5 class="px-3 text-white">Administrador</h5>
     <ul class="nav flex-column">
+      {% if usuario_tiene_permiso('dashboard') %}
         <li class="nav-item">
-            <a href="{{ url_for('main.dashboard') }}"
-               class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}">Inicio</a>
+          <a href="{{ url_for('main.dashboard') }}" class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}">
+            <i class="fa fa-tachometer-alt"></i> Inicio
+          </a>
+        </li>
+      {% endif %}
+      {% if usuario_tiene_permiso('productos') %}
+        <li class="nav-item">
+          <a href="{{ url_for('producto.list_products') }}" class="nav-link {% if request.endpoint.startswith('producto.list_products') %}active{% endif %}">
+            <i class="fa fa-box"></i> Productos
+          </a>
+        </li>
+      {% endif %}
+      {% if usuario_tiene_permiso('clientes') %}
+        <li class="nav-item">
+          <a href="{{ url_for('cliente.list_cliente') }}" class="nav-link {% if request.endpoint == 'cliente.list_cliente' %}active{% endif %}">
+            <i class="fa fa-users"></i> Clientes
+          </a>
+        </li>
+      {% endif %}
+      {% if usuario_tiene_permiso('automoviles') %}
+        <li class="nav-item">
+          <a href="{{ url_for('automovil.listar_automoviles') }}" class="nav-link {% if request.endpoint.startswith('automovil.') %}active{% endif %}">
+            <i class="fa fa-car"></i> Automoviles
+          </a>
+        </li>
+      {% endif %}
+      {% if usuario_tiene_permiso('proveedores') %}
+        <li class="nav-item">
+          <a href="{{ url_for('proveedor.list_proveedores') }}" class="nav-link {% if request.endpoint == 'proveedor.list_proveedores' %}active{% endif %}">
+            <i class="fa fa-truck"></i> Proveedores
+          </a>
+        </li>
+      {% endif %}
+      {% if usuario_tiene_permiso('ingresos') %}
+        <li class="nav-item">
+          <a href="{{ url_for('ingreso.list_ingresos') }}" class="nav-link {% if request.endpoint == 'ingreso.list_ingresos' %}active{% endif %}">
+            <i class="fa fa-money-bill"></i> Ingresos
+          </a>
+        </li>
+      {% endif %}
+      {% if usuario_tiene_permiso('inventario') %}
+        <li class="nav-item">
+          <a href="{{ url_for('inventario.listar_inventario') }}" class="nav-link {% if request.endpoint == 'inventario.listar_inventario' %}active{% endif %}">
+            <i class="fa fa-warehouse"></i> Inventario
+          </a>
+        </li>
+      {% endif %}
+      {% if usuario_tiene_permiso('cotizacion') %}
+        <li class="nav-item">
+          <a href="{{ url_for('cotizacion.listar_cotizaciones') }}" class="nav-link {% if request.endpoint == 'cotizacion.listar_cotizacion' %}active{% endif %}">
+            <i class="fa fa-file-invoice-dollar"></i> Cotización
+          </a>
+        </li>
+      {% endif %}
+      {% if usuario_tiene_permiso('servicios') %}
+        <li class="nav-item">
+          <a href="{{ url_for('servicio.list_servicios') }}" class="nav-link {% if request.endpoint == 'servicio.list_servicios' %}active{% endif %}">
+            <i class="fa fa-tools"></i> Servicios
+          </a>
+        </li>
+      {% endif %}
+      {% if usuario_tiene_permiso('roles') %}
+        <li class="nav-item">
+          <a href="{{ url_for('rol.usuarios_roles') }}" class="nav-link">
+            <i class="fa fa-user-cog"></i> Roles y usuarios
+          </a>
         </li>
         <li class="nav-item">
-            <a href="{{ url_for('orden.list_orders') }}"
-               class="nav-link {% if request.endpoint.startswith('orden.') %}active{% endif %}">Órdenes</a>
+          <a href="{{ url_for('rol.gestion_permisos') }}" class="nav-link">
+            <i class="fa fa-key"></i> Roles
+          </a>
         </li>
+      {% endif %}
+      {% if usuario_tiene_permiso('pendientes') %}
         <li class="nav-item">
-            <a href="{{ url_for('automovil.list_automovil') }}"
-               class="nav-link {% if request.endpoint.startswith('automovil.') %}active{% endif %}">Automoviles</a>
+          <a href="{{ url_for('pendiente.listar_pendientes') }}" class="nav-link">
+            <i class="fa fa-clock"></i> Pendientes
+          </a>
         </li>
-        <li class="nav-item">
-            <a href="{{ url_for('receipts.list_receipts') }}"
-               class="nav-link {% if request.endpoint == 'receipts.list_receipts' %}active{% endif %}">Comprobantes</a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ url_for('products.list_products') }}"
-               class="nav-link {% if request.endpoint.startswith('products.') %}active{% endif %}">Productos</a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ url_for('main.lista_clientes') }}"
-               class="nav-link {% if request.endpoint == 'main.lista_clientes' %}active{% endif %}">
-                Clientes
-            </a>
-
-        </li>
+      {% endif %}
     </ul>
     <!-- Botón fijo abajo a la izquierda -->
     <div class="sidebar-logout-container">
-        <a href="{{ url_for('main.logout') }}" class="btn-logout-sidebar">Cerrar sesión</a>
+      <a href="{{ url_for('main.logout') }}" class="btn-logout-sidebar">Cerrar sesión</a>
     </div>
+  </nav>
+  {% endif %}
 
+  <!-- CONTENIDO -->
+  <main class="main-content">
+    <!-- Mensajes flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="container mb-3">
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% block content %} 
+    {% endblock %}
+  </main>
 
-</nav>
-
-<!-- CONTENIDO -->
-<main class="main-content">
-
-
-
-    {% block content %}{% endblock %}
-</main>
-
-
-<!-- SCRIPTS -->
-
-<!-- Botón fijo Cerrar Sesión -->
-<ul class="nav flex-column">
-    <li class="nav-item">
-        <a
-                href="#"
-                class="nav-link"
-                data-bs-toggle="modal"
-                data-bs-target="#logoutModal"
-        >Cerrar sesión</a>
-    </li>
-</ul>
-
-
-
-<!-- Bootstrap JS Bundle -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-{% block scripts %}
-{% endblock %}
-
+  <!-- Bootstrap JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{{ url_for('static', filename='js/utilitarios.js') }}"></script>
+  {% block scripts %}{% endblock %}
 </body>
-
-
 </html>

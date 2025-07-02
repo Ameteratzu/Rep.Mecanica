@@ -1,0 +1,286 @@
+<!-- Modal Editar Cotización -->
+<div class="modal fade" id="editarCotizacionModal" tabindex="-1" aria-labelledby="editarCotizacionLabel" aria-hidden="true"
+                  data-bs-backdrop="static">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content text-dark">
+      <div class="modal-header">
+        <h5 class="modal-title w-100 text-center" id="editarCotizacionLabel">Editar Cotización</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+
+      <form id="formEditarCotizacion" method="POST">
+        <div class="modal-body">
+         
+          <input type="hidden" name="venta_id" id="venta_id">
+          <div class="row g-3 mb-3">
+            <div class="col-md-3">
+              <label class="form-label">Nº Cotización</label>
+              <input type="text" class="form-control" id="editar_codigo" readonly>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Fecha</label>
+              <input type="date" class="form-control" id="editar_fecha" readonly>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Fecha de Vencimiento</label>
+              <input type="date" class="form-control" name="fecha_vencimiento" id="editar_fecha_vencimiento">
+            </div>
+            <div class="col-md-3">
+              <label for="estado_id" class="form-label">Estado</label>
+              <select class="form-select" name="estado_id" id="editar_estado_id">
+                {% for estado in estados %}
+                  <option value="{{ estado.id }}">{{ estado.nombre }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <!-- Cliente -->
+          <h6 class="mt-3">Cliente</h6>
+          <div class="row g-2 mb-2">
+            <div class="col-md-3">
+              <button type="button" class="btn btn-secondary w-100 btnBuscarCliente"
+                      data-cliente-id="editar_cliente_id"
+                      data-cliente-dni="editar_dni"
+                      data-cliente-nombre="editar_nombre_cliente"
+                      data-cliente-celular="editar_celular">
+                Seleccionar Cliente
+              </button>
+            </div>
+          </div>
+          <div class="row g-2 mb-2">
+            <div class="col-md-3">
+              <label class="form-label">DNI / RUC</label>
+              <input type="text" id="editar_dni" class="form-control" readonly>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Nombre Completo</label>
+              <input type="text" id="editar_nombre_cliente" class="form-control" readonly>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Celular</label>
+              <input type="text" id="editar_celular" class="form-control" readonly>
+            </div>
+          </div>
+          <input type="hidden" name="cliente_id" id="editar_cliente_id">
+          <!-- Agregar campo para documento si lo necesitas -->
+          <input type="hidden" id="editar_documento">
+
+          <!-- Automovil -->
+          <h6 class="mt-3">Automóvil</h6>
+          <div class="row g-2 mb-2">
+            <div class="col-md-3">
+              <button type="button" class="btn btn-secondary w-100 btnBuscarAuto"
+                      data-auto-id="editar_automovil_id"
+                      data-auto-placa="editar_placa_auto"
+                      data-auto-detalle="editar_detalle_auto">
+                Seleccionar Automóvil
+              </button>
+            </div>
+          </div>
+          <div class="row g-2 mb-2">
+            <div class="col-md-3">
+              <label class="form-label">Placa</label>
+              <input type="text" id="editar_placa_auto" class="form-control" readonly>
+            </div>
+            <div class="col-md-9">
+              <label class="form-label">Detalle</label>
+              <input type="text" id="editar_detalle_auto" class="form-control" readonly>
+            </div>
+          </div>
+          <input type="hidden" name="automovil_id" id="editar_automovil_id">
+
+          <!-- Diagnóstico y observaciones -->
+          <div class="row g-2 mb-3">
+            <div class="col-md-12">
+              <label class="form-label">Diagnóstico</label>
+              <textarea name="diagnostico" id="editar_diagnostico" class="form-control" rows="2"></textarea>
+            </div>
+          </div>
+
+          <!-- Productos y Servicios -->
+        <div id="productosServiciosEditar">
+            <!-- Será rellenado por JS con productos y servicios actuales -->
+          
+          <!-- Sección para agregar productos -->
+          <h6 class="mt-3">Agregar Productos</h6>
+          <div class="row g-2 my-2">
+            <div class="col-md-2">
+              <button type="button" class="btn btn-secondary abrir-modal-secundario"
+                      data-modal-origen="editarCotizacionModal"
+                      data-modal-destino="modalProducto">
+                <i class="fas fa-search"></i> Buscar Producto
+              </button>
+            </div>
+          </div>
+          <div class="row g-2 mb-3">
+            <div class="col-md-2">
+              <label class="form-label">Código</label>
+              <input type="text" id="editar_codigoProducto" class="form-control" readonly>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Nombre</label>
+              <input type="text" id="editar_nombreProducto" class="form-control" readonly>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Precio</label>
+              <input type="number" id="editar_precioProducto" class="form-control" step="0.01">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Descuento (%)</label>
+              <input type="number" id="editar_descuentoProducto" class="form-control" value="0" min="0" max="100" step="0.01">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Cantidad</label>
+              <input type="number" id="editar_cantidadProducto" class="form-control">
+            </div>
+            <div class="col-md-1 d-flex align-items-end">
+              <button type="button" class="btn btn-success w-100" id="editar_btnAgregarProducto">+</button>
+            </div>
+          </div>
+
+          <!-- Tabla productos agregados -->
+          <table class="table table-hover">
+            <thead class="table-dark">
+              <tr>
+                <th>Código</th>
+                <th>Producto</th>
+                <th>Precio</th>
+                <th>Descuento</th>
+                <th>Cantidad</th>                
+                <th>Total</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="editar_productosAgregados">
+              <!-- JS renderizado -->
+            </tbody>
+          </table>
+          <div class="row mb-3">
+            <div class="col-md-3 offset-md-9">
+              <label class="form-label fw-bold">Total Productos (S/):</label>
+              <input type="text" class="form-control fw-bold text-end" id="editar_totalProductos" readonly value="0.00">
+            </div>
+          </div>
+
+          <!-- Sección para agregar servicios -->
+          <h6 class="mt-3">Agregar Servicios</h6>
+          <div class="row g-2 mb-2">
+            <div class="col-md-2">
+              <button type="button" class="btn btn-secondary abrir-modal-secundario"
+                      data-modal-origen="editarCotizacionModal"
+                      data-modal-destino="modalServicio">
+                <i class="fas fa-search"></i> Buscar Servicio
+              </button>
+            </div>
+          </div>
+          <div class="row g-2 mb-3">
+            <div class="col-md-2">
+              <label class="form-label">Código</label>
+              <input type="text" id="editar_codigoServicio" class="form-control" readonly>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Servicio</label>
+              <input type="text" id="editar_nombreServicio" class="form-control" readonly>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Precio</label>
+              <input type="number" id="editar_precioServicio" class="form-control" readonly>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Descuento (%)</label>
+              <input type="number" id="editar_descuentoServicio" class="form-control" value="0" min="0" max="100" step="0.01">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Cantidad</label>
+              <input type="number" id="editar_cantidadServicio" class="form-control" min="1" value="1">
+            </div>
+            <div class="col-md-1 d-flex align-items-end">
+              <button type="button" class="btn btn-success w-100" id="editar_btnAgregarServicio">+</button>
+            </div>
+          </div>
+
+          <!-- Tabla servicios agregados -->
+          <table class="table table-hover">
+            <thead class="table-dark">
+              <tr>
+                <th>Codigo</th>
+                <th>Servicio</th>
+                <th>Precio</th>
+                <th>Descuento</th>
+                <th>Cantidad</th>
+                <th>Total</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="editar_serviciosAgregados">
+              <!-- JS renderizado -->
+            </tbody>
+          </table>
+          <div class="row mb-3">
+            <div class="col-md-3 offset-md-9">
+              <label class="form-label fw-bold">Total Servicios (S/):</label>
+              <input type="text" class="form-control fw-bold text-end" id="editar_totalServicios" readonly value="0.00">
+            </div>
+          </div>
+        </div>
+          <!-- Totales -->
+          <div class="row g-2 mt-3">
+            <div class="col-md-3 offset-md-9">
+              <label for="descuento" class="form-label">Descuento (%)</label>
+              <input type="number" name="descuento" id="editar_descuento_porcentaje" 
+                          class="form-control" value="0" min="0" max="100" step="0.01">
+            </div>
+            <div class="row mb-3">
+            <!-- Subtotal -->
+              <div class="col-md-3 offset-md-9 mt-2">
+                <label class="form-label">Subtotal (S/)</label>
+                <input type="text" class="form-control text-end" id="editar_subtotal" readonly value="0.00">
+              </div>
+
+              <!-- Descuento en monto -->
+              <div class="col-md-3 offset-md-9 mt-2">
+                <label class="form-label">Descuento (S/)</label>
+                <input type="text" class="form-control text-end" id="editar_descuento_monto" readonly value="0.00">
+              </div>
+
+              <!-- Total sin IGV -->
+              <div class="col-md-3 offset-md-9 mt-2">
+                <label class="form-label">Total sin IGV (S/)</label>
+                <input type="text" class="form-control text-end" id="editar_total_sin_igv" readonly value="0.00">
+              </div>
+
+              <!-- IGV -->
+              <div class="col-md-3 offset-md-9 mt-2">
+                <label class="form-label">IGV (18%)</label>
+                <input type="text" class="form-control text-end" id="editar_igv" readonly value="0.00">
+              </div>
+
+              <!-- Total General -->
+              <div class="col-md-3 offset-md-9 mt-2 mb-2">
+                <label class="form-label fw-bold">Total General (S/)</label>
+                <input type="text" class="form-control fw-bold text-end text-success" id="editar_total" 
+                      readonly value="0.00">
+              </div>
+            </div>
+
+          </div>
+
+
+          <!-- Observaciones -->
+          <div class="row g-2 mt-3">
+            <div class="col-md-12">
+              <label class="form-label">Observaciones</label>
+              <textarea name="observaciones" id="editar_observaciones" class="form-control" rows="2"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

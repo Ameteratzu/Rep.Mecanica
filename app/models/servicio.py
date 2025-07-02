@@ -1,4 +1,3 @@
-# app/models/servicio.py
 from app.extensions import db
 
 class Servicio(db.Model):
@@ -11,3 +10,5 @@ class Servicio(db.Model):
     descuento   = db.Column(db.Numeric(10,2), nullable=False)
     precio      = db.Column(db.Numeric(10,2), nullable=False)
     activo      = db.Column(db.Boolean, default=True)
+    
+    ventas_servicio = db.relationship('VentaServicio', back_populates='servicio', cascade='all, delete-orphan')

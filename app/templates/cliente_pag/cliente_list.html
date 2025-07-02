@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Listado de Clientes</h2>
+  </div>
+
+  <!-- Botones alineados a la izquierda justo debajo del título -->
+  <div class="d-flex gap-3 mb-4">
+    <a href="{{ url_for('cliente.export_excel') }}" class="btn btn-success">Exportar a Excel</a>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevoProductoModal">
+      <i class="fas fa-plus"></i> Nuevo Cliente
+    </button>
+  </div>
+
+  <form method="get" class="row mb-3 align-items-end">
+    <div class="col-md-3">
+      <label id="filter-state" class="form-label">Filtrar por estado:</label>
+      <select name="estado" class="form-select" onchange="this.form.submit()">
+        <option value="Todos" {% if estado == 'Todos' %}selected{% endif %}>Todos</option>
+        <option value="Activo" {% if estado == 'Activo' %}selected{% endif %}>Activo</option>
+        <option value="Inactivo" {% if estado == 'Inactivo' %}selected{% endif %}>Inactivo</option>
+      </select>
+    </div>
+    <div class="col-md-5">
+      <label id="search" class="form-label">Buscar:</label>
+      <input type="text" name="search" class="form-control" placeholder="Nombre, Documento, Celular..." value="{{ search|default('') }}">
+    </div>
+    <div class="col-md-2">
+      <button type="submit" class="btn btn-primary w-100">Buscar</button>
+    </div>
+  </form>
+
+  <table class="table table-hover table-striped">
+    <thead class="table-dark">
+      <tr>
+        <th>Tipo Doc</th>
+        <th>Nº Doc</th>
+        <th>Nombre</th>
+        <th>Apellidos</th>
+        <th>Celular</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in clientes %}
+      <tr>
+        <td>{{ c.tipo_documento }}</td>
+        <td>{{ c.documento }}</td>
+        <td>{{ c.nombres }}</td>
+        <td>{{ c.apellidos }}</td>
+        <td>{{ c.celular }}</td>
+        <td>{{ 'Activo' if c.activo else 'Inactivo' }}</td>
+        <td>
+          <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editarClienteModal{{ c.id }}">
+            Editar
+          </button>
+          {% include 'cliente_pag/modal_editar_cliente.html' with context %}
+          <form action="{{ url_for('cliente.eliminar_cliente', cliente_id=c.id) }}" 
+            method="POST" style="display:inline" onsubmit="return confirmarEliminacion(event)">
+            <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="7" class="text-center">No hay clientes registrados.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- Paginación -->
+  <nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+      {% if pagination.has_prev %}
+        <li class="page-item">
+          <a class="page-link" href="{{ url_for('cliente.list_cliente', page=pagination.prev_num) }}">← Anterior</a>
+        </li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">← Anterior</span></li>
+      {% endif %}
+
+      {% for page_num in pagination.iter_pages() %}
+        {% if page_num %}
+          <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+            <a class="page-link" href="{{ url_for('cliente.list_cliente', page=page_num) }}">{{ page_num }}</a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">…</span></li>
+        {% endif %}
+      {% endfor %}
+
+      {% if pagination.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="{{ url_for('cliente.list_cliente', page=pagination.next_num) }}">Siguiente →</a>
+        </li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">Siguiente →</span></li>
+      {% endif %}
+    </ul>
+  </nav>
+
+<!-- Modal para agregar un nuevo cliente -->
+{% include 'cliente_pag/modal_nuevo_cliente.html' %}  
+
+
+{% endblock %}
+

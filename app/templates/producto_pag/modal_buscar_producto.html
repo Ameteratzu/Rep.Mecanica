@@ -1,0 +1,37 @@
+<!-- Modal Seleccionar Producto -->
+<div class="modal fade" id="modalProducto" tabindex="-1" aria-labelledby="modalProductoLabel" aria-hidden="true"
+     data-modal-retorno="nuevoIngresoModal">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content text-dark">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalProductoLabel">Seleccionar Producto</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <label for="buscarProductoInput" class="form-label">Buscar producto</label>
+        <input type="text" id="buscarProductoInput" class="form-control mb-3" placeholder="Buscar por código, nombre o marca...">       
+
+        <table class="table table-bordered table-hover">
+          <thead class="table-dark">
+            <tr>
+              <th>Código</th>
+              <th>Nombre</th>
+              <th>Marca</th>
+              <th>Categoría</th>
+              <th>Stock</th>
+              <th>Costo</th>
+              <th>Precio</th>
+              <th>Seleccionar</th>
+            </tr>
+          </thead>
+          <tbody id="tablaProductos">
+            <!-- Productos cargados dinámicamente -->
+          </tbody>
+        </table>
+
+        <input type="hidden" id="idProductoSeleccionado" value="">
+        <hr>
+      </div>
+    </div>
+  </div>
+</div>

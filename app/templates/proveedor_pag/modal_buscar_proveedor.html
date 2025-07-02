@@ -1,0 +1,51 @@
+<!-- Modal Seleccionar Proveedor -->
+<div class="modal fade" id="modalProveedor" tabindex="-1" aria-labelledby="modalProveedorLabel" aria-hidden="true"
+  data-modal-retorno="nuevoIngresoModal">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content text-dark">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalProveedorLabel">Seleccionar Proveedor</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <label for="filtroProveedor" class="form-label">Buscar proveedor</label>
+        <input type="text" id="filtroProveedor" class="form-control mb-3" placeholder="Buscar por RUC o Razón Social">
+        <table class="table table-bordered table-hover" id="tablaProveedores">
+          <thead class="table-dark">
+            <tr>
+              <th>RUC</th>
+              <th>Razón Social</th>
+              <th>Teléfono</th>
+              <th>Dirección</th>
+              <th>Seleccionar</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for proveedor in proveedores %}
+            <tr>
+              <td>{{ proveedor.ruc }}</td>
+              <td>{{ proveedor.razon_social }}</td>
+              <td>{{ proveedor.telefono }}</td>
+              <td>{{ proveedor.direccion }}</td>
+              <td>
+                <button type="button" 
+                    class="btn btn-sm btn-primary"
+                    onclick="seleccionarProveedor(
+                        {{ proveedor.id }}, 
+                        '{{ proveedor.ruc }}', 
+                        '{{ proveedor.razon_social | escape }}', 
+                        '{{ proveedor.telefono }}', 
+                        '{{ proveedor.direccion | escape }}'
+                    )">
+                    Seleccionar
+                </button>
+
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

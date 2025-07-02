@@ -1,4 +1,3 @@
-<!-- Rep.Mecanica/app/templates/login.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -9,141 +8,7 @@
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
     rel="stylesheet"
   />
-  <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: #f8f9fa;
-    }
-
-    .login-right{
-    background: linear-gradient(135deg, #1b254b, #007bff); /* Degradado diagonal */
-    color: white;
-    }
-    .login-right a{
-    color: white !important;
-    
-
-text-decoration: underline !important;
-    }
-      
-input{
-text-shadow: 1px 1px 1px #004bff, 0px 0px 1px white; /* Sombra azul y blanco */
-  }
-
-    .login-container {
-      
-    
-
-      border: 3px solid rgba(0, 0, 0, 0.3); /* Borde oscuro */
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Agrega sombra al borde */
-      background-size: 80%; /* Reduce el tamaño del background */
-      width: 90vw;
-      max-width: 1200px;
-      height: 90vh;
-      display: flex;
-      box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,0.1);
-      border-radius: 0.5rem;
-      overflow: hidden;
-    }
-    .login-left {
-      flex: 1.2;
-      background: url('{{ url_for("static", filename="img/login-bg.jpg") }}') center / cover no-repeat;
-      
-      
-
-border: 3px solid rgba(0, 0, 0, 0.3); /* Borde oscuro */
-box-shadow: 0 2em 2rem rgba(0, 0, 0, 0.0); /* Sombra más marcada */
-background-size: 80%; /* Reduce el tamaño del background */
-     
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      text-align: center;
-      padding: 1rem;
-    }
-    .login-left h3 {
-      font-size: 2rem;
-      margin-bottom: 1rem;
-    }
-    .login-left p {
-      font-size: 1.25rem;
-      line-height: 1.4;
-    }
-    .login-right {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: #fff;
-    }
-    .form-container {
-      width: 100%;
-      max-width: 360px;
-      padding: 2rem;
-    }
-    .form-container h4 {
-      margin-bottom: 1.5rem;
-      text-align: center;
-    }
-    .input-group-text.btn-toggle-pw {
-      cursor: pointer;
-      user-select: none;
-    }
-    .form-container .form-control {
-      border-radius: 0.25rem;
-    }
-    .form-container .btn-primary {
-      border-radius: 0.25rem;
-    }
-    .btn-toggle-pw {
-      cursor: pointer;
-    }
-    .extra-links {
-      margin-top: 1rem;
-      text-align: center;
-    }
-    .extra-links a {
-      color: #007bff;
-      text-decoration: none;
-    }
-    .extra-links a:hover {
-      text-decoration: underline;
-    }
-    .modal-footer
-    {
-      display: flex;
-      justify-content: center;
-    }
-    .txt-parrafo {
-      text-align: center;
-      font-size: 1.2rem;
-      margin: 0 0 1rem 0;
-    }
-    .modal-title {
-      font-size: 1.5rem;
-      margin: 0;
-      justify-content: center;
-      text-align: center;
-      width: 100%;
-    }
-    .modal-header {
-      border-bottom: none;
-    }
-    .btn-primary {
-      background-color: #1b254b;
-      border: none;
-      height: 3rem;
-      font-size: 1rem;
-      text-transform: uppercase;
-      letter-spacing: .05em;
-      border-radius: 0;
-    }
-  </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
 </head>
 <body>
 
@@ -200,23 +65,21 @@ background-size: 80%; /* Reduce el tamaño del background */
             </div>
           </div>
           <button type="submit" class="btn btn-primary w-100">Iniciar Sesión  →</button>
-          <!-- <button type="submit" class="btn btn-primary w-100">Iniciar Sesión  →</button> -->
         </form>
 
         <div class="extra-links">
-          <!-- Abre un modal en lugar de navegar -->
           <a href="#" data-bs-toggle="modal" data-bs-target="#forgotModal">
             ¿Olvidaste tu contraseña?
           </a><br/>
           ¿No tienes cuenta?
           <a href="{{ url_for('main.register') }}">Regístrate aquí</a>
         </div>
-          {% if current_user.is_authenticated and is_admin() %}
-            <a href="{{ url_for('admin_panel.admin_panel') }}" class="btn btn-warning w-100 my-3">
-              Ir directamente al Panel de Administración
-            </a>
-          {% endif %}
-          </div>
+
+        {% if current_user.is_authenticated and is_admin() %}
+          <a href="{{ url_for('main.admin_panel') }}" class="btn btn-warning w-100 my-3">
+            Ir directamente al Panel de Administración
+          </a>
+        {% endif %}
       </div>
     </div>
   </div>

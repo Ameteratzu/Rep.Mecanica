@@ -1,0 +1,12 @@
+
+<!-- templates/cotizacion_pag/nueva_cotizacion.html -->
+<html>
+  <body>
+    <h1>Error al registrar la cotización</h1>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <p><strong>{{ category }}:</strong> {{ message }}</p>
+      {% endfor %}
+    {% endwith %}
+  </body>
+</html>

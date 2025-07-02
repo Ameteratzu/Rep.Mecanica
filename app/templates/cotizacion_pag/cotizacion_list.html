@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="flex-grow-1">
+  <div class="justify-content-between">
+    <h2 class="mb-4">Listado de Cotizaciones</h2>
+    <hr>
+    
+    <!-- Herramientas -->
+    <div class="d-flex justify-content-between align-items-center">
+      <div class="d-flex gap-2">
+        {#<a href="{{ url_for('ingreso.exportar_ingresos_excel') }}" class="btn btn-success">
+          <i class="fas fa-file-csv"></i> Exportar Excel
+        </a>#}
+        <!-- Botón para abrir el modal -->
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevaCotizacionModal">
+          <i class="fas fa-plus"></i> Registrar Cotización
+        </button>
+      </div>
+      <form class="d-flex" method="get" action="{{ url_for('cotizacion.listar_cotizaciones') }}">
+        <input type="text" name="search" class="form-control" value="{{ search or '' }}" placeholder="Código, Fecha, Fecha de Vencimiento">
+        <button class="btn btn-primary ms-2" type="submit">Buscar</button>
+      </form>
+    </div>
+  </div>
+</div>
+{#
+<form method="get" class="mb-3">
+  <label for="filter-state" class="form-label">Filtrar por estado:</label>
+  <select name="estado" class="form-select" onchange="this.form.submit()">
+    <option value="Activo" {% if estado == 'Activo' %}selected{% endif %}>Activo</option>
+    <option value="Todos" {% if estado == 'Todos' %}selected{% endif %}>Todos</option>
+    <option value="Inactivo" {% if estado == 'Inactivo' %}selected{% endif %}>Inactivo</option>
+  </select>
+</form>
+#}
+<table class="table table-hover table-striped">
+  <thead class="table-dark">
+    <tr>      
+      <th>Código</th>
+      <th>Fecha</th>
+      <th>Fecha Final</th>
+      <th>Cliente</th>
+      <th>Automovil</th>
+      <th>Celular</th>
+      <th>Total</th>
+      <th>Estado</th>
+      <th>Acción</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for c in cotizaciones %}
+    <tr>      
+      <td>{{ c.codigo }}</td>
+      <td>{{ c.fecha }}</td>
+      <td>{{ c.fecha_vencimiento }}</td>
+      <td>{{ c.cliente.nombres }} {{ c.cliente.apellidos }}</td>
+      <td>{{ c.automovil.modelo if c.automovil else 'Sin automóvil' }}</td>
+      <td>{{ c.cliente.celular }}</td>
+      <td>{{ c.total }}</td>
+      <td>{{ c.estado.nombre }}</td>
+      <td>
+        <button type="button"
+                class="btn btn-sm btn-warning me-1 btnEditarCotizacion"
+                data-id="{{ c.id }}"
+                data-bs-toggle="modal"
+                data-bs-target="#editarCotizacionModal">
+          Editar
+        </button>
+        <button type="button"
+                class="btn btn-sm btn-warning me-1 btnPagar"
+                data-id="{{ c.id }}"
+                data-estado="{{ c.estado.nombre }}">
+          Pagar
+        </button>
+        
+        <form action="{{ url_for('cotizacion.eliminado_logico', venta_id=c.id) }}" method="POST" style="display:inline" onsubmit="return confirmarEliminacion(event)">
+          <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% if pagination %}
+<nav aria-label="Page navigation">
+  <ul class="pagination justify-content-center">
+    {% if pagination.has_prev %}
+      <li class="page-item"><a class="page-link" href="{{ url_for(request.endpoint, page=pagination.prev_num) }}">Anterior</a></li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">Anterior</span></li>
+    {% endif %}
+    {% for page_num in pagination.iter_pages(left_edge=2, right_edge=2, left_current=2, right_current=2) %}
+      {% if page_num %}
+        {% if page_num == pagination.page %}
+          <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
+        {% else %}
+          <li class="page-item"><a class="page-link" href="{{ url_for(request.endpoint, page=page_num) }}">{{ page_num }}</a></li>
+        {% endif %}
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">…</span></li>
+      {% endif %}
+    {% endfor %}
+    {% if pagination.has_next %}
+      <li class="page-item"><a class="page-link" href="{{ url_for(request.endpoint, page=pagination.next_num) }}">Siguiente</a></li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">Siguiente</span></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+
+<!-- Modales -->
+
+{% include 'cotizacion_pag/modal_nueva_cotizacion.html' %}
+{% include 'cotizacion_pag/modal_editar_cotizacion.html' %}
+{% include 'cliente_pag/modal_buscar_cliente.html' %}
+{% include 'producto_pag/modal_buscar_producto.html' %}    
+{% include 'servicio_pag/modal_buscar_servicio.html' %}
+{% include 'automovil_pag/modal_buscar_automovil.html' %}
+{% include 'venta_pag/modal_nueva_venta.html' %}
+
+<!-- Datos precargados para Boleta y Factura -->
+<div id="comprobante-datos"
+     data-boleta-serie="{{ boleta_tentativa[0] }}"
+     data-boleta-numero="{{ '%08d'|format(boleta_tentativa[1]) }}"
+     data-factura-serie="{{ factura_tentativa[0] }}"
+     data-factura-numero="{{ '%06d'|format(factura_tentativa[1]) }}">
+</div>
+
+{% endblock %}
+
+
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/cotizacion.js') }}"></script>
+<script src="{{ url_for('static', filename='js/venta.js') }}"></script>
+<script src="{{ url_for('static', filename='js/cotizacion_editar.js') }}"></script>
+<script src="{{ url_for('static', filename='js/cliente_buscar.js') }}"></script>
+<script src="{{ url_for('static', filename='js/automovil_buscar.js') }}"></script>
+<script src="{{ url_for('static', filename='js/producto_buscar.js') }}"></script>
+<script src="{{ url_for('static', filename='js/servicio_buscar.js') }}"></script>
+<script>
+  setTimeout(() => {
+    document.querySelectorAll('.alert').forEach(alert => {
+      const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+      bsAlert.close();
+    });
+  }, 4000);
+</script>
+{% endblock %}

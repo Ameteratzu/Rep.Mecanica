@@ -1,0 +1,35 @@
+<!-- Modal Seleccionar Servicio -->
+<div class="modal fade" id="modalServicio" tabindex="-1" aria-labelledby="modalServicioLabel" aria-hidden="true"
+     data-modal-retorno="nuevoIngresoModal">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content text-dark">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalServicioLabel">Seleccionar Servicio</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <label for="buscarServicioInput" class="form-label">Buscar servicio</label>
+        <input type="text" id="buscarServicioInput" class="form-control mb-3" placeholder="Buscar por código o nombre...">
+
+        <table class="table table-bordered table-hover">
+          <thead class="table-dark">
+            <tr>
+              <th>Código</th>
+              <th>Nombre</th>
+              <th>Descripción</th>
+              <th>Precio</th>
+              <th>Descuento</th>
+              <th>Seleccionar</th>
+            </tr>
+          </thead>
+          <tbody id="tablaServicios">
+            <!-- Servicios cargados dinámicamente -->
+          </tbody>
+        </table>
+
+        <input type="hidden" id="idServicioSeleccionado" value="">
+        <hr>
+      </div>
+    </div>
+  </div>
+</div>

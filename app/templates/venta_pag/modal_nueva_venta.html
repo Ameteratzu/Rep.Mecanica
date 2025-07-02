@@ -1,0 +1,56 @@
+<!-- Modal Pagar -->
+<div class="modal fade" id="nuevaVentaModal" tabindex="-1">
+  <div class="modal-dialog">
+    <form method="POST" id="formNuevaVenta">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Confirmar Venta</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">      
+          
+
+          <div class="mb-3">
+            <label>Tipo de Comprobante</label>
+            <select name="comprobante_tipo" id="comprobante_tipo" class="form-select">
+              <option >Escoger Comprobante</option>
+              <option value="Boleta">Boleta</option>
+              <option value="Factura">Factura</option>
+            </select>
+          </div>
+
+          <div class="row g-2 mb-2">
+            <div class="col-md-4">
+              <label>Serie</label>
+              <input type="text" name="comprobante_serie" id="comprobante_serie" class="form-control" readonly>
+            </div>
+            <div class="col-md-4">
+              <label>Número</label>
+              <input type="text" name="comprobante_numero" id="comprobante_numero" class="form-control" readonly>
+            </div>
+            <div class="col-md-4">
+              <label>Fecha</label>
+              <input type="text" name="comprobante_fecha" id="comprobante_fecha" class="form-control" readonly>
+            </div>
+          </div>
+
+          <hr>
+
+          <div>
+            <p>Total productos: <span id="venta_total_productos">S/ 0.00</span></p>
+            <p>Total servicios: <span id="venta_total_servicios">S/ 0.00</span></p>
+            <p>Subtotal: <span id="venta_subtotal">S/ 0.00</span></p>
+            <p>Descuento: <span id="venta_descuento_monto">S/ 0.00</span></p>
+            <p>Total sin IGV: <span id="venta_total_sin_igv">S/ 0.00</span></p>            
+            <p>IGV: <span id="venta_igv">S/ 0.00</span></p>
+            <h5 class="text-success">Total a pagar: <span id="venta_total_general">S/ 0.00</span></h5>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Confirmar y Registrar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

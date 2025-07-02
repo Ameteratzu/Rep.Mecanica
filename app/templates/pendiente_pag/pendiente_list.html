@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Pendientes | TECMECH{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Pendientes</h2>
+    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalPendiente">+ Nuevo</button>
+  </div>
+  <table class="table table-bordered table-hover bg-white">
+    <thead>
+      <tr>
+        <th>Título</th>
+        <th>Descripción</th>
+        <th>Estado</th>
+        <th>F. Límite</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody id="tbody-pendientes">
+      {% for p in pendientes %}
+      <tr data-id="{{ p.id }}">
+        <td class="fw-bold">{{ p.titulo }}</td>
+        <td>{{ p.descripcion }}</td>
+        <td>
+          <span class="badge bg-{{ 'secondary' if p.estado=='Pendiente' else 'primary' if p.estado=='En Proceso' else 'success' }}">{{ p.estado }}</span>
+        </td>
+        <td>{{ p.fecha_limite or '' }}</td>
+        <td>
+          <button class="btn btn-sm btn-info text-white btn-editar">Editar</button>
+          <button class="btn btn-sm btn-danger btn-borrar">Borrar</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Modal Nuevo/Editar -->
+<div class="modal fade" id="modalPendiente" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog"><div class="modal-content">
+    <form id="form-pendiente">
+      <div class="modal-header">
+        <h5 class="modal-title">Pendiente</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="pendiente-id" name="id">
+        <div class="mb-2">
+          <label class="form-label">Título</label>
+          <input type="text" name="titulo" id="pendiente-titulo" class="form-control" required>
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Descripción</label>
+          <textarea name="descripcion" id="pendiente-descripcion" class="form-control"></textarea>
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Estado</label>
+          <select name="estado" id="pendiente-estado" class="form-select">
+            <option>Pendiente</option>
+            <option>En Proceso</option>
+            <option>Completado</option>
+          </select>
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Fecha límite</label>
+          <input type="date" name="fecha_limite" id="pendiente-fecha" class="form-control">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+      </div>
+    </form>
+  </div></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/pendientes.js') }}"></script>
+{% endblock %}

@@ -1,18 +1,15 @@
-<!-- Rep.Mecanica/app/templates/register.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Registrar cuenta – TECMECH</title>
+  <title>Registro – TECMECH</title>
   <link
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-  />
+    rel="stylesheet"/>
   <link 
     href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" 
-    rel="stylesheet"
-  />
+    rel="stylesheet"/>
   <style>
     html, body {
       height: 100%;
@@ -41,14 +38,31 @@
       color: white;
       text-align: center;
       padding: 1rem;
+      position: relative;
     }
-    .register-left h3 {
-      font-size: 2rem;
+    .logo-wrapper {
+      width: 80%;
+      max-width: 350px;
+      margin: 0 auto;
+      background: rgba(255,255,255,0.92);
+      border-radius: 1rem;
+      padding: 2rem 1rem;
+      box-shadow: 0 6px 32px #2d2e83a1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .logo-wrapper img {
+      max-width: 170px;
+      width: 100%;
       margin-bottom: 1rem;
     }
-    .register-left p {
-      font-size: 1.25rem;
-      line-height: 1.4;
+    .logo-wrapper h1 {
+      color: #1b254b;
+      font-weight: bold;
+      font-size: 2rem;
+      margin: 0;
+      letter-spacing: 2px;
     }
     .register-right {
       flex: 1;
@@ -66,18 +80,13 @@
       text-align: center;
       margin-bottom: 1.5rem;
       font-weight: bold;
+      color: #1b254b;
     }
     .form-register .form-label {
       text-transform: uppercase;
       font-size: 0.85rem;
       color: #555;
       margin-bottom: .5rem;
-    }
-    .form-register .input-group-text {
-      cursor: pointer;
-      user-select: none;
-      background: transparent;
-      border: none;
     }
     .form-register .form-control {
       border-radius: 0;
@@ -93,16 +102,23 @@
       letter-spacing: .05em;
       border-radius: 0;
     }
-    .form-register .extra-link {
+    .register-links {
       text-align: center;
-      margin-top: 1rem;
+      margin-top: 1.5rem;
+      font-size: .96rem;
     }
-    .form-register .extra-link a {
-      color: #007bff;
+    .register-links a {
+      color: #1b254b;
+      font-weight: bold;
       text-decoration: none;
     }
-    .form-register .extra-link a:hover {
+    .register-links a:hover {
       text-decoration: underline;
+    }
+    @media (max-width: 900px) {
+      .register-container { flex-direction: column; height: auto; }
+      .register-left, .register-right { flex: unset; width: 100%; }
+      .register-left { min-height: 200px; }
     }
   </style>
 </head>
@@ -110,12 +126,8 @@
 
   <div class="register-container">
     <div class="register-left">
-      <div>
-        <h3></h3>
-        <p></p>
-      </div>
-    </div>
 
+    </div>
     <div class="register-right">
       <div class="form-register">
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -129,88 +141,33 @@
           {% endif %}
         {% endwith %}
 
-        <h2>Crear nueva cuenta</h2>
-        <form method="post">
-          <div class="mb-4">
+        <h2>Crear cuenta</h2>
+        <form method="post" autocomplete="off">
+          <div class="mb-3">
             <label for="nombres" class="form-label">Nombres</label>
-            <input
-              id="nombres"
-              name="nombres"
-              type="text"
-              class="form-control"
-              placeholder="Tus nombres"
-              required
-            />
+            <input type="text" class="form-control" name="nombres" id="nombres" required>
           </div>
-          <div class="mb-4">
+          <div class="mb-3">
             <label for="apellidos" class="form-label">Apellidos</label>
-            <input
-              id="apellidos"
-              name="apellidos"
-              type="text"
-              class="form-control"
-              placeholder="Tus apellidos"
-              required
-            />
+            <input type="text" class="form-control" name="apellidos" id="apellidos" required>
           </div>
-          <div class="mb-4">
-            <label for="email" class="form-label">Correo</label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              class="form-control"
-              placeholder="usuario@correo.com"
-              required
-              autofocus
-            />
+          <div class="mb-3">
+            <label for="email" class="form-label">Correo electrónico</label>
+            <input type="email" class="form-control" name="email" id="email" required>
           </div>
-
-          <div class="mb-4">
+          <div class="mb-3">
             <label for="password" class="form-label">Contraseña</label>
-            <div class="input-group">
-              <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                class="form-control"
-                placeholder="••••••••"
-                required
-              />
-              <span class="input-group-text"
-                    onclick="let p=document.getElementById('password'); p.type = p.type==='password'?'text':'password';">
-                👁
-              </span>
-            </div>
+            <input type="password" class="form-control" name="password" id="password" minlength="6" required>
           </div>
-
-          <div class="mb-4">
-            <label for="password2" class="form-label">Repite contraseña</label>
-            <div class="input-group">
-              <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
-              <input
-                id="password2"
-                name="password2"
-                type="password"
-                class="form-control"
-                placeholder="••••••••"
-                required
-              />
-              <span class="input-group-text"
-                    onclick="let p2=document.getElementById('password2'); p2.type = p2.type==='password'?'text':'password';">
-                👁
-              </span>
-            </div>
+          <div class="mb-3">
+            <label for="password2" class="form-label">Repite la contraseña</label>
+            <input type="password" class="form-control" name="password2" id="password2" minlength="6" required>
           </div>
-
-          <button type="submit" class="btn btn-primary w-100">Registrar cuenta →</button>
+          <button type="submit" class="btn btn-primary w-100">Registrarme</button>
         </form>
-
-        <p class="extra-link">
-          ¿Ya tienes cuenta? 
-          <a href="{{ url_for('main.login') }}">Inicia sesión aquí</a>
-        </p>
+        <div class="register-links mt-3">
+          ¿Ya tienes cuenta? <a href="{{ url_for('main.login') }}">Inicia sesión aquí</a>
+        </div>
       </div>
     </div>
   </div>

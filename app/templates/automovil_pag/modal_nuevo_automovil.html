@@ -1,0 +1,68 @@
+<div class="modal fade" id="nuevoAutomovilModal" tabindex="-1" aria-labelledby="nuevoAutomovilLabel" aria-hidden="true"
+      data-bs-backdrop="static">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="nuevoAutomovilLabel">Nuevo Automóvil</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <form action="{{ url_for('automovil.create_automovil') }}" method="post">
+          <div class="row">
+            <!-- Cliente -->
+            <div class="col-md-9">
+              <label for="cliente_nombre" class="form-label">Cliente</label>
+              <input type="text" class="form-control" id="cliente_nombre" name="cliente_nombre" placeholder="Seleccione un cliente" readonly required>
+              <!-- Cliente ID oculto -->
+              <input type="hidden" id="cliente_id" name="cliente_id" required>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+              <button type="button" 
+                      class="btn btn-secondary w-100 btnBuscarCliente"
+                      data-cliente-id="cliente_id"
+                      data-cliente-nombre="cliente_nombre">
+                  Buscar Cliente
+              </button>
+
+
+            </div>
+
+            <!-- Resto de campos del automóvil -->
+            <div class="col-md-6 mt-3">
+              <label for="placa" class="form-label">Placa</label>
+              <input type="text" class="form-control" id="placa" name="placa" maxlength="10" required>
+            </div>
+            <div class="col-md-6 mt-3">
+              <label for="marca" class="form-label">Marca</label>
+              <input type="text" class="form-control" id="marca" name="marca" maxlength="50" required>
+            </div>
+            <div class="col-md-6 mt-3">
+              <label for="modelo" class="form-label">Modelo</label>
+              <input type="text" class="form-control" id="modelo" name="modelo" maxlength="50" required>
+            </div>
+            <div class="col-md-6 mt-3">
+              <label for="año" class="form-label">Año</label>
+              <input type="number" class="form-control" id="año" name="año">
+            </div>
+            <div class="col-md-6 mt-3">
+              <label for="color" class="form-label">Color</label>
+              <input type="text" class="form-control" id="color" name="color" maxlength="30" required>
+            </div>
+            <div class="col-md-6 mt-3">
+              <label for="activo" class="form-label">Estado</label>
+              <select class="form-select" id="activo" name="activo" required>
+                <option value="1">Activo</option>
+                <option value="0">Inactivo</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <button type="submit" class="btn btn-primary">Guardar Automóvil</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
