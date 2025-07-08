@@ -1,3 +1,7 @@
-# MOdificacion de todo el proyecto
+# PROYECTO DE MECANICA
 
-## INSTALACIONES PYTHON 3.(VERSION)
+## DEPENDENCIAS
+
+### INSTALACIONES PYTHON 3.(VERSION)
+###
+###
